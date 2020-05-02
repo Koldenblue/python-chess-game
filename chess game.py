@@ -22,18 +22,19 @@ for piece in pieces:
 allPieces = whitePieces + blackPieces       #Lists of the possible pieces. 
 
 def setStartEndIndices(startLocation, endLocation):
-    '''Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.'''
-    global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex 
-    
+    #Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.
+    global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
+
     startRow = startLocation[0]
     endRow = endLocation[0]     
     startColumn = startLocation[1]
     endColumn = endLocation[1]
-
-    startRowIndex = rowString.find(startRow)                                                   
+    startRowIndex = rowString.find(startRow)                                               
     endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1                                 
     startColumnIndex = columnString.find(startColumn)
     endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
+'''Using the above function as a shortcut to define variables may cause problems, vs. just copy-pasting and defining the variables every time a movement function is called.'''
+'''for some reason using the above function for whitePawnMovement() is okay, but it gives an undefined local error for 'startRowIndex' when using for the bishopMovement() function????'''
 
 def visualBoard(playstate): 
     '''Prints a graphic version of all the pieces on the chessboard.'''        
@@ -102,7 +103,7 @@ def whitePawnMovement(board, startLocation, endLocation):
     '''Rules for moving a white pawn.'''
     
     setStartEndIndices(startLocation, endLocation)
-   
+    
     try:
         if startRow == '2':       #If the pawn starts in row 2, rules dictate that it can move forward one or two spaces.
             if endRow == '3' and endColumn == startColumn:  
@@ -204,36 +205,122 @@ def rookMovement(board, startLocation, endLocation):
 
 def bishopMovement(board, startLocation, endLocation):
     '''Rules for moving a bishop.'''
+    startRow = startLocation[0]
+    endRow = endLocation[0]     
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+
+    startRowIndex = rowString.find(startRow)                                                   
+    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1                                 
+    startColumnIndex = columnString.find(startColumn)
+    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
+    
+    if board[startLocation].startswith('w'):
+        turn = 'w'
+    if board[startLocation].startswith('b'):
+        turn = 'b'
    
-    setStartEndIndices(startLocation, endLocation)
+    if turn == 'b':              #first check that the endLocation can be moved to
+        if board[endLocation].startswith('w') or board[endLocation] == ' ': #if moving a black bishop, if the end location has a white piece or is empty, return true
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck
+    if turn == 'w':
+        if board[endLocation].startswith('b') or board[endLocation] == ' ': 
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck      
+    inBetweenSpaces = []
+   
+    if startRowIndex < endRowIndex and startColumnIndex < endColumnIndex:    # if the bishop is moving diagonally up and to the right:
+        while True:                 #These  loops return diagonal positions that a bishop can move to. 
+            if startRowIndex == endRowIndex:       
+                break               #if you hit the edge of the rows or columns, break the for loop
+            if startColumnIndex == endColumnIndex:
+                break
+            startRowIndex += 1          #increment rows and columns by one
+            startColumnIndex += 1
+            inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex]) # and then append the position to list of valid diagonal movement positions
+    
+    if startRowIndex > endRowIndex and startColumnIndex < endColumnIndex: # if the bishop is moving diagonally down and to the right
+        while True:                
+            if startRowIndex == endRowIndex:
+                break
+            if startColumnIndex == endColumnIndex:
+                break
+            startRowIndex -= 1   
+            print('startRow = ' + str(startRowIndex))       
+            startColumnIndex += 1
+            print('startColumnIndex = ' + str(startColumnIndex))
+            inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
+
+    if startRowIndex < endRowIndex and startColumnIndex > endColumnIndex: # if the bishop is moving diagonally up and to the left
+        while True:                
+            if startRowIndex == endRowIndex:
+                break
+            if startColumnIndex == endColumnIndex:
+                break
+            startRowIndex += 1
+            startColumnIndex -= 1
+            inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
+
+    if startRowIndex > endRowIndex and startColumnIndex > endColumnIndex: # if the bishop is moving diagonally down and to the left
+        while True:                
+            if startRowIndex == endRowIndex:
+                break
+            if startColumnIndex == endColumnIndex:
+                break
+            startRowIndex -= 1
+            startColumnIndex -= 1
+            inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
+    
+    if endLocation not in inBetweenSpaces: 
+        validEndCheck = False
+        return validEndCheck
+
+    del inBetweenSpaces[-1] #inBetweenSpaces[-1] is the destination space. Only the spaces in between the destination and start need to be checked to be empty. 
+    #print(inBetweenSpaces) #for debugging
+    for space in inBetweenSpaces:
+        if board[space] != ' ':
+            validEndCheck = False
+            return validEndCheck
+
+    return validEndCheck
+
+
+def knightMovement(board, startLocation, endLocation):
+    startRow = startLocation[0]
+    endRow = endLocation[0]     
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+
+    startRowIndex = rowString.find(startRow)                                                   
+    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1                                 
+    startColumnIndex = columnString.find(startColumn)
+    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
 
     if board[startLocation].startswith('w'):
         turn = 'w'
     if board[startLocation].startswith('b'):
         turn = 'b'
-    while True:    
-        if turn == 'b':              #first check that the endLocation can be moved to
-            if board[endLocation].startswith('w') or board[endLocation] == ' ': #if moving a black bishop, if the end location has a white piece or is empty, return true
-                validEndCheck = True
-            else:
-                validEndCheck = False
-            break
-        elif turn == 'w':
-            if board[endLocation].startswith('b') or board[endLocation] == ' ': 
-                validEndCheck = True
-            else:
-                validEndCheck = False
-            break
-    validEndLocations = []
-    shorterRowString = rowString[1:]
-    shorterColumnString = columnString[1:]
-   # for row in rowString[startRowIndex]:
-    
-    return validEndCheck
-
-
-#def knightMovement(board, startLocation, endLocation):
-
+   
+    if turn == 'b':              #first check that the endLocation can be moved to
+        if board[endLocation].startswith('w') or board[endLocation] == ' ': 
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck
+    if turn == 'w':
+        if board[endLocation].startswith('b') or board[endLocation] == ' ': 
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck     
+    validEndLocations = []        
+    try:
+        
 #def queenMovement(board, startLocation, endLocation):
 
 #def kingMovement(board, startLocation, endLocation):
@@ -279,7 +366,7 @@ testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': '
  '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ', '5a': ' ', '5b': ' ', '5c': ' ', 
  '5d': ' ', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ', '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ', 
  '4g': ' ', '4h': ' ', '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ', '2a': 'wp', 
- '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wp', '2g': 'wp', '2h': 'wp', '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': 'wR'}
+ '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': ' ', '2g': 'wp', '2h': ' ', '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': 'wR'}
 
 
 visualBoard(testBoard)
@@ -291,3 +378,7 @@ whiteMove(testBoard)
 #Input()
 #print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 #whiteMove(chessboard)
+
+#TODO:
+''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn, 
+rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
