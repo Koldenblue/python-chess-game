@@ -319,7 +319,7 @@ def knightMovement(board, startLocation, endLocation):
             validEndCheck = False
             return validEndCheck     
     validEndLocations = []        
-    try:
+   # try:
         
 #def queenMovement(board, startLocation, endLocation):
 
