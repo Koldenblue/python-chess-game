@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 #chess game
 from colorama import Fore, Back, Style
+import sys
+
 rows = tuple('87654321')        #a tuple of the rows.
 columns = tuple('abcdefgh')     #a tuple of the columns.
 rowString = '012345678'         #Row 1 is index 1, row 2 is index 2, etc.
@@ -34,8 +36,8 @@ def setStartEndIndices(startLocation, endLocation):
     endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
     startColumnIndex = columnString.find(startColumn)
     endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
-'''Using the above function as a shortcut to define variables may cause problems, vs. just copy-pasting and defining the variables every time a movement function is called.'''
-'''for some reason using the above function for whitePawnMovement() is okay, but it gives an undefined local error for 'startRowIndex' when using for the bishopMovement() function????'''
+    '''Using the above function as a shortcut to define variables may cause problems, vs. just copy-pasting and defining the variables every time a movement function is called.'''
+    '''for some reason using the above function for whitePawnMovement() is okay, but it gives an undefined local error for 'startRowIndex' when using for the bishopMovement() function????'''
 
 def visualBoard(playstate):
     '''Prints a graphic version of all the pieces on the chessboard.'''
@@ -290,7 +292,6 @@ def bishopMovement(board, startLocation, endLocation):
 
     return validEndCheck
 
-
 def knightMovement(board, startLocation, endLocation):
     startRow = startLocation[0]
     endRow = endLocation[0]
@@ -319,18 +320,66 @@ def knightMovement(board, startLocation, endLocation):
         else:
             validEndCheck = False
             return validEndCheck
+
     validEndLocations = []
-   # try:
+    try:        #making a list of the eight possible spaces a knight can move to
+        validEndLocations.append(rowString[startRowIndex + 2] + columnString[startColumnIndex + 1])
+    except IndexError:
+        pass    #IndexError will occur if the knight is too close to the edge of the board i.e. the knight can't move off the board
+    try:
+        if startRowIndex - 2 > 0:           #make sure the knight can't "wrap" around to the other side of the board with a negative index
+            validEndLocations.append(rowString[startRowIndex - 2] + columnString[startColumnIndex + 1])
+    except IndexError:
+        pass
+    try:
+        if startColumnIndex - 1 > 0:
+            validEndLocations.append(rowString[startRowIndex + 2] + columnString[startColumnIndex - 1])
+    except IndexError:
+        pass
+    try:
+        if startRowIndex - 2 > 0 and startColumnIndex - 1 > 0:
+            validEndLocations.append(rowString[startRowIndex - 2] + columnString[startColumnIndex - 1])
+    except IndexError:
+        pass
+    try:
+        validEndLocations.append(rowString[startRowIndex + 1] + columnString[startColumnIndex + 2])
+    except IndexError:
+        pass
+    try:
+        if startRowIndex - 1 > 0:
+            validEndLocations.append(rowString[startRowIndex - 1] + columnString[startColumnIndex + 2])
+    except IndexError:
+        pass
+    try:
+        if startColumnIndex - 2 > 0:
+            validEndLocations.append(rowString[startRowIndex + 1] + columnString[startColumnIndex - 2])
+    except IndexError:
+        pass
+    try:
+        if startRowIndex - 1 > 0 and startColumnIndex - 2 > 0:
+            validEndLocations.append(rowString[startRowIndex - 1] + columnString[startColumnIndex - 2])
+    except IndexError:
+        pass
+
+    print(validEndLocations) #print for debugging
+    #already checked earlier to make sure the endLocation was empty or has a piece of the opposite color
+    if endLocation in validEndLocations:
+        validEndCheck = True
+    else:
+        validEndCheck = False
+    return validEndCheck
 
 #def queenMovement(board, startLocation, endLocation):
 
 #def kingMovement(board, startLocation, endLocation):
 
-
 def whiteMove(board):
     '''This function asks what white piece to move to where. The function provides rules for valid movement.'''
     while True:
         startLocation = input(' White turn! Location of piece you would like to move? Enter row, then column.\n')
+        '''if startLocation.lower() == 'exit':
+            sys.exit
+            break'''	#exit not working
         if startLocation not in board.keys():
             print('Invalid location! Please enter row, then column. E.g. "1a"')
             continue
@@ -340,12 +389,20 @@ def whiteMove(board):
         elif board[startLocation].startswith('w'):          #picked a valid start location containing a white piece.
             piece = board[startLocation]
             endLocation = input('To what location would you like to move this piece?\n')        #after picking a valid start location, pick an end location confined by the movement rules
+            '''if endLocation.lower() == 'exit':
+                sys.exit
+                break'''	#exit not working
+            if endLocation not in board.keys():
+                print('Invalid location! Please enter a valid row, then column. E.g. "1a"')
+                continue
             if board[startLocation] == 'wp':
                 validEndCheck = whitePawnMovement(board, startLocation, endLocation)
             if board[startLocation] == 'wR':
                 validEndCheck = rookMovement(board, startLocation, endLocation)
             if board[startLocation] == 'wB':
                 validEndCheck = bishopMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'wN':
+                validEndCheck = knightMovement(board, startLocation, endLocation)
             if not validEndCheck:
                 print('Invalid move!')
                 visualBoard(board)
@@ -367,11 +424,13 @@ testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': '
  '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ', '5a': ' ', '5b': ' ', '5c': ' ',
  '5d': ' ', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ', '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ',
  '4g': ' ', '4h': ' ', '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ', '2a': 'wp',
- '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': ' ', '2g': 'wp', '2h': ' ', '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': 'wR'}
+ '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ', '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': ' '}
 
-
+print('\nWelcome to Kevin\'s chess game! Be sure your window is wide enough to avoid graphical errors with the board!')
+#print('Type "exit" at any time to quit.') #exit command not yet working, because sys.exit only exits the current function
 visualBoard(testBoard)
 whiteMove(testBoard)
+visualBoard(testBoard)
 
 #chessInit(chessboard)
 #visualBoard(chessboard)
@@ -379,7 +438,8 @@ whiteMove(testBoard)
 #Input()
 #print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 #whiteMove(chessboard)
-
+# git test
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
 rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
+
