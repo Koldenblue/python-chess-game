@@ -350,9 +350,9 @@ def knightMovement(board, startLocation, endLocation):
 	endColumn = endLocation[1]
 
 	startRowIndex = rowString.find(startRow)
-	# endRowIndex = rowString.find(endRow)    #unused variable          # row 8 is index 8, row 1 is index 1
+	endRowIndex = rowString.find(endRow)    #unused variable          # row 8 is index 8, row 1 is index 1
 	startColumnIndex = columnString.find(startColumn)
-	# endColumnIndex = columnString.find(endColumn)      # unused variable      # column a is index 1, h is 8
+	endColumnIndex = columnString.find(endColumn)      # unused variable      # column a is index 1, h is 8
 
 	if board[startLocation].startswith('w'):
 		turn = 'w'
@@ -489,7 +489,7 @@ visualBoard(testBoard)
 #Input()
 #print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 #whiteMove(chessboard)
-# git test
+# git  5/5/2020 10:00 pm
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
 rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
