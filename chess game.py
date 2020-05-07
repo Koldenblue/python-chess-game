@@ -15,15 +15,15 @@ for rowNum in rows:
 for position in positions:
     chessboard[position] = ' '      #Now chessboard is a dictionary of all positions with empty spaces as the values.
 
-# This block of code is unnecessary at this point. Lists of the colors, pieces, and pieces belonging to each color.
-'''pieceColors = ['w', 'b'] 
+# This next block of code is unnecessary at this point. Lists colors, pieces, and pieces belonging to each color.
+pieceColors = ['w', 'b'] 
 pieces = ['p', 'R', 'B', 'N', 'Q', 'K']
 blackPieces = []
 whitePieces = []
 for piece in pieces:
     whitePieces.append(pieceColors[0] + piece)
     blackPieces.append(pieceColors[1] + piece)
-allPieces = whitePieces + blackPieces'''
+allPieces = whitePieces + blackPieces
 
 def setStartEndIndices(startLocation, endLocation):
     # Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.
@@ -592,16 +592,15 @@ def whiteMove(board):
 
 #def blackMove(board):
 
-
-
-
-
+# A test chessboard that can be set up for testing purposes.
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
-'7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': 'bp', '7e': 'bp', '7f': 'bp', '7g': 'bp', '7h': 'bp', '6a': 'wp',
- '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ', '5a': ' ', '5b': ' ', '5c': ' ',
- '5d': 'wQ', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ', '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ',
- '4g': ' ', '4h': ' ', '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ', '2a': 'wp',
- '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ', '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': ' '}
+    '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': 'bp', '7e': 'bp', '7f': 'bp', '7g': 'bp', '7h': 'bp',
+    '6a': 'wp', '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ',
+    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wQ', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
+    '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ', '4g': ' ', '4h': ' ',
+    '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ',
+    '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ',
+    '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': ' '}
 
 print('\nWelcome to Kevin\'s chess game! Be sure your window is wide enough to avoid graphical errors with the board!')
 print('Type "exit" at any time to quit.')  # Exiting is inelegant, but works when entering start or end locations.
@@ -615,7 +614,9 @@ visualBoard(testBoard)
 #Input()
 #print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 #whiteMove(chessboard)
-# git  5/6/2020 10:30 pm
+
+# Updated: 5/7/2020 8:30 am
+
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
 rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
