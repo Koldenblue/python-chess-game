@@ -620,7 +620,7 @@ visualBoard(testBoard)
 #print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 #whiteMove(chessboard)
 
-# Updated: 5/7/2020 8:30 am
+# Updated: 5/7/2020 9:00 am
 
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
