@@ -605,7 +605,12 @@ testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': '
 print('\nWelcome to Kevin\'s chess game! Be sure your window is wide enough to avoid graphical errors with the board!')
 print('Type "exit" at any time to quit.')  # Exiting is inelegant, but works when entering start or end locations.
 visualBoard(testBoard)
-whiteMove(testBoard)
+
+try:
+    whiteMove(testBoard)
+except Exception as exitMessage:
+    print(exitMessage)  # The except clause will still result in the remaining code being executed.
+
 visualBoard(testBoard)
 
 #chessInit(chessboard)
