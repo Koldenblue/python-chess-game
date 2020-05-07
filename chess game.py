@@ -544,8 +544,51 @@ def queenMovement(board, startLocation, endLocation):
 
 def kingMovement(board, startLocation, endLocation):
     '''Rules for moving a king.'''
-    # To be edited.
-    validEndCheck = True
+    startRow = startLocation[0]
+    endRow = endLocation[0]
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+    startRowIndex = rowString.find(startRow)
+    endRowIndex = rowString.find(endRow)  # Row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    endColumnIndex = columnString.find(endColumn)  # Column a is index 1, h is 8
+
+    if board[startLocation].startswith('w'):
+        turn = 'w'
+    if board[startLocation].startswith('b'):
+        turn = 'b'
+
+    if turn == 'b':
+        if board[endLocation].startswith('w') or board[endLocation] == ' ':
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck
+    if turn == 'w':
+        if board[endLocation].startswith('b') or board[endLocation] == ' ':
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck
+
+    validEndLocations = []
+    for row in range(-1, 2):
+        for column in range(-1, 2):
+            try:
+                validEndLocations.append(rowString[startRowIndex + row] + columnString[startColumnIndex + column])
+            except IndexError:
+                pass
+    # Already checked earlier that the piece is moving to a valid board location.
+    # So validEndLocations can include spaces like 70 or 0h, but this doesn't matter.
+    for space in validEndLocations:
+        if space == startLocation:
+            validEndLocations.remove(space)
+
+    print(validEndLocations)
+    if endLocation not in validEndLocations:
+        validEndCheck = False
+        return validEndCheck
+
     return validEndCheck
 
 def whiteMove(board):
@@ -555,10 +598,10 @@ def whiteMove(board):
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
         if startLocation not in board.keys():
-            print('Invalid location! Please enter row, then column. E.g. "1a"')
+            print('Invalid location! Please enter row, then column. E.g. "1a"\n')
             continue
         elif not board[startLocation].startswith('w'):
-            print('There is no white chess piece at that location. Please enter a valid location.')
+            print('There is no white chess piece at that location. Please enter a valid location.\n')
             continue
         elif board[startLocation].startswith('w'):          #picked a valid start location containing a white piece.
             piece = board[startLocation]
@@ -596,11 +639,11 @@ def whiteMove(board):
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
     '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': 'bp', '7e': 'bp', '7f': 'bp', '7g': 'bp', '7h': 'bp',
     '6a': 'wp', '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ',
-    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wQ', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
+    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wQ', '5e': ' ', '5f': ' ', '5g': 'wK', '5h': ' ',
     '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ', '4g': ' ', '4h': ' ',
     '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ',
     '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ',
-    '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': ' '}
+    '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': 'wK'}
 
 print('\nWelcome to Kevin\'s chess game! Be sure your window is wide enough to avoid graphical errors with the board!')
 print('Type "exit" at any time to quit.')  # Exiting is inelegant, but works when entering start or end locations.
@@ -620,7 +663,7 @@ visualBoard(testBoard)
 #print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 #whiteMove(chessboard)
 
-# Updated: 5/7/2020 9:00 am
+# Updated: 5/7/2020 3:40 pm
 
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
