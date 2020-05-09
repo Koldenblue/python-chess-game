@@ -25,10 +25,11 @@ for piece in pieces:
     blackPieces.append(pieceColors[1] + piece)
 allPieces = whitePieces + blackPieces
 
-def setStartEndIndices(startLocation, endLocation):
-    # Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.
-    global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
 
+def setStartEndIndices(startLocation, endLocation):
+    '''Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.'''
+    # Simply setting variables as global doesn't seem to always work. Instead, return the eight variables.
+    # global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
     startRow = startLocation[0]
     endRow = endLocation[0]
     startColumn = startLocation[1]
@@ -37,8 +38,7 @@ def setStartEndIndices(startLocation, endLocation):
     endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
     startColumnIndex = columnString.find(startColumn)
     endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
-    '''Using the above function as a shortcut to define variables may cause problems, vs. just copy-pasting and defining the variables every time a movement function is called.'''
-    '''For some reason using the above function for whitePawnMovement() is okay, but it gives an undefined local error for 'startRowIndex' when using for the bishopMovement() function?'''
+    return startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
 
 def visualBoard(playstate):
     '''Prints a graphic version of all the pieces on the chessboard.'''
@@ -94,7 +94,6 @@ def chessInit(board):
     board['1f'] = 'wN'
     board['1g'] = 'wB'
     board['1h'] = 'wR'
-    print(board)
 
 def movePiece(board, piece, startLocation, endLocation):
     '''This function updates piece locations on the board after moving the pieces.'''
@@ -106,7 +105,7 @@ def movePiece(board, piece, startLocation, endLocation):
 def whitePawnMovement(board, startLocation, endLocation):
     '''Rules for moving a white pawn.'''
 
-    setStartEndIndices(startLocation, endLocation)
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
 
     try:
         if startRow == '2':       #If the pawn starts in row 2, rules dictate that it can move forward one or two spaces.
@@ -161,7 +160,7 @@ def whitePawnMovement(board, startLocation, endLocation):
 def blackPawnMovement(board, startLocation, endLocation):
     '''Rules for moving a black pawn.'''
     # White and black pawn functions might be combined, but would require extra effort. Could use a "turn" function.
-    setStartEndIndices(startLocation, endLocation)
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
 
     try:
         if startRow == '7':       #If the pawn starts in row 7, rules dictate that it can move forward one or two spaces.
@@ -214,7 +213,7 @@ def blackPawnMovement(board, startLocation, endLocation):
 def rookMovement(board, startLocation, endLocation):
     '''Rules for moving a Rook.'''
 
-    setStartEndIndices(startLocation, endLocation)
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
 
     if board[startLocation].startswith('w'):
         turn = 'w'
@@ -265,15 +264,9 @@ def rookMovement(board, startLocation, endLocation):
 
 def bishopMovement(board, startLocation, endLocation):
     '''Rules for moving a bishop.'''
-    startRow = startLocation[0]
-    endRow = endLocation[0]
-    startColumn = startLocation[1]
-    endColumn = endLocation[1]
 
-    startRowIndex = rowString.find(startRow)
-    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
-    startColumnIndex = columnString.find(startColumn)
-    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
+
 
     if board[startLocation].startswith('w'):
         turn = 'w'
@@ -594,7 +587,9 @@ def kingMovement(board, startLocation, endLocation):
 def whiteMove(board):
     '''This function asks what white piece to move to where. The function provides rules for valid movement.'''
     while True:
-        startLocation = input(' White turn! Location of piece you would like to move? Enter row, then column.\n')
+        #Always print the board at the start of the loop, except when game is first started.
+        visualBoard(board)
+        startLocation = input(Fore.CYAN + 'White turn!' + Fore.RESET + ' Location of piece you would like to move? Enter row, then column.\n')
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
         if startLocation not in board.keys():
@@ -625,15 +620,51 @@ def whiteMove(board):
                 validEndCheck = kingMovement(board, startLocation, endLocation)
             if not validEndCheck:
                 print('Invalid move!')
-                visualBoard(board)
                 continue
-            if validEndCheck:
+            else:
                 movePiece(board, piece, startLocation, endLocation)
-                visualBoard(board)
-                #break          #need to come back to this later, to end white's turn
-                continue
+                break
 
-#def blackMove(board):
+
+def blackMove(board):
+    '''This function asks what black piece to move to where. The function provides rules for valid movement.'''
+    while True:
+        visualBoard(board)
+        startLocation = input(Fore.RED + 'Black turn! ' + Fore.RESET + 'Location of piece you would like to move? Enter row, then column.\n')
+        if startLocation.lower() == 'exit':
+            raise Exception('Exiting program!') # Need to handle exiting better.
+        if startLocation not in board.keys():
+            print('Invalid location! Please enter row, then column. E.g. "1a"\n')
+            continue
+        elif not board[startLocation].startswith('b'):
+            print('There is no black chess piece at that location. Please enter a valid location.\n')
+            continue
+        elif board[startLocation].startswith('b'):          #picked a valid start location containing a white piece.
+            piece = board[startLocation]
+            endLocation = input('To what location would you like to move this piece?\n')  #after picking a valid start location, pick an end location confined by the movement rules
+            if endLocation.lower() == 'exit':
+                raise Exception('Exiting program!')
+            if endLocation not in board.keys():
+                print('Invalid location! Please enter a valid row, then column. E.g. "1a"')
+                continue
+            if board[startLocation] == 'bp':
+                validEndCheck = blackPawnMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bR':
+                validEndCheck = rookMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bB':
+                validEndCheck = bishopMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bN':
+                validEndCheck = knightMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bQ':
+                validEndCheck = queenMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bK':
+                validEndCheck = kingMovement(board, startLocation, endLocation)
+            if not validEndCheck:
+                print('Invalid move!')
+                continue
+            else:
+                movePiece(board, piece, startLocation, endLocation)
+                break
 
 # A test chessboard that can be set up for testing purposes.
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
@@ -645,25 +676,37 @@ testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': '
     '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ',
     '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': 'wK'}
 
-print('\nWelcome to Kevin\'s chess game! Be sure your window is wide enough to avoid graphical errors with the board!')
+# Welcome Screen.
+print('\n\n' + Fore.GREEN + Back.BLACK + ('~' * 131) + Fore.RESET + Back.RESET)
+print('Welcome to Kevin\'s chess game! Be sure your window is wide enough to avoid graphical errors with the board!')
 print('Type "exit" at any time to quit.')  # Exiting is inelegant, but works when entering start or end locations.
-visualBoard(testBoard)
+print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
+print(Fore.GREEN + Back.BLACK + ('~' * 131) + Fore.RESET + Back.RESET)
 
-try:
+# Initialize the chessboard. Note that 'testboard' can instead be used for debugging.
+# May want to implement saving, instead of initializing board always.
+chessInit(chessboard)
+
+# Main program loop.
+while True:
     whiteMove(testBoard)
-except Exception as exitMessage:
-    print(exitMessage)  # The except clause will still result in the remaining code being executed.
+    # blackMove(testBoard)
 
-visualBoard(testBoard)
 
-#chessInit(chessboard)
-#visualBoard(chessboard)
-#print('Welcome to Kevin's chess game! Press any key to continue. Press ctrl-c at any time to exit.')
-#Input()
-#print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
-#whiteMove(chessboard)
+'''visualBoard(testBoard)
+##try:
+blackMove(testBoard)
+#except Exception as exitMessage:
+#    print(exitMessage)  # The except clause will still result in the remaining code being executed.
+#try:
+whiteMove(testBoard)
+#except Exception as exitMessage:
+ #   print(exitMessage)  # The except clause will still result in the remaining code being executed.
 
-# Updated: 5/7/2020 3:40 pm
+visualBoard(testBoard)'''
+
+
+# Updated: 5/9/2020 4:30 pm
 
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
