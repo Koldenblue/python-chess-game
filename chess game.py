@@ -633,7 +633,47 @@ def whiteMove(board):
                 #break          #need to come back to this later, to end white's turn
                 continue
 
-#def blackMove(board):
+def blackMove(board):
+    '''This function asks what black piece to move to where. The function provides rules for valid movement.'''
+    while True:
+        startLocation = input(Fore.RED + 'Black turn! ' + Fore.RESET + 'Location of piece you would like to move? Enter row, then column.\n')
+        if startLocation.lower() == 'exit':
+            raise Exception('Exiting program!') # Need to handle exiting better.
+        if startLocation not in board.keys():
+            print('Invalid location! Please enter row, then column. E.g. "1a"\n')
+            continue
+        elif not board[startLocation].startswith('b'):
+            print('There is no black chess piece at that location. Please enter a valid location.\n')
+            continue
+        elif board[startLocation].startswith('b'):          #picked a valid start location containing a white piece.
+            piece = board[startLocation]
+            endLocation = input('To what location would you like to move this piece?\n')  #after picking a valid start location, pick an end location confined by the movement rules
+            if endLocation.lower() == 'exit':
+                raise Exception('Exiting program!')
+            if endLocation not in board.keys():
+                print('Invalid location! Please enter a valid row, then column. E.g. "1a"')
+                continue
+            if board[startLocation] == 'bp':
+                validEndCheck = blackPawnMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bR':
+                validEndCheck = rookMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bB':
+                validEndCheck = bishopMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bN':
+                validEndCheck = knightMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bQ':
+                validEndCheck = queenMovement(board, startLocation, endLocation)
+            if board[startLocation] == 'bK':
+                validEndCheck = kingMovement(board, startLocation, endLocation)
+            if not validEndCheck:
+                print('Invalid move!')
+                visualBoard(board)
+                continue
+            if validEndCheck:
+                movePiece(board, piece, startLocation, endLocation)
+                visualBoard(board)
+                #break          #need to come back to this later, to end black's turn
+                continue
 
 # A test chessboard that can be set up for testing purposes.
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
@@ -648,11 +688,14 @@ testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': '
 print('\nWelcome to Kevin\'s chess game! Be sure your window is wide enough to avoid graphical errors with the board!')
 print('Type "exit" at any time to quit.')  # Exiting is inelegant, but works when entering start or end locations.
 visualBoard(testBoard)
-
-try:
-    whiteMove(testBoard)
-except Exception as exitMessage:
-    print(exitMessage)  # The except clause will still result in the remaining code being executed.
+##try:
+blackMove(testBoard)
+#except Exception as exitMessage:
+#    print(exitMessage)  # The except clause will still result in the remaining code being executed.
+#try:
+whiteMove(testBoard)
+#except Exception as exitMessage:
+ #   print(exitMessage)  # The except clause will still result in the remaining code being executed.
 
 visualBoard(testBoard)
 
@@ -663,7 +706,7 @@ visualBoard(testBoard)
 #print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 #whiteMove(chessboard)
 
-# Updated: 5/7/2020 3:40 pm
+# Updated: 5/9/2020 6:40 am
 
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
