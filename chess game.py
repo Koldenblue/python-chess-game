@@ -28,7 +28,8 @@ allPieces = whitePieces + blackPieces
 
 def setStartEndIndices(startLocation, endLocation):
     '''Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.'''
-    #global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
+    # Simply setting variables as global doesn't seem to always work. Instead, return the eight variables.
+    # global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
     startRow = startLocation[0]
     endRow = endLocation[0]
     startColumn = startLocation[1]
@@ -38,8 +39,6 @@ def setStartEndIndices(startLocation, endLocation):
     startColumnIndex = columnString.find(startColumn)
     endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
     return startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
-    '''Using the above function as a shortcut to define variables may cause problems, vs. just copy-pasting and defining the variables every time a movement function is called.'''
-    '''For some reason using the above function for whitePawnMovement() is okay, but it gives an undefined local error for 'startRowIndex' when using for the bishopMovement() function?'''
 
 def visualBoard(playstate):
     '''Prints a graphic version of all the pieces on the chessboard.'''
