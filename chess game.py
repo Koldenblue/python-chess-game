@@ -27,9 +27,8 @@ allPieces = whitePieces + blackPieces
 
 
 def setStartEndIndices(startLocation, endLocation):
-    # Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.
-    global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
-
+    '''Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.'''
+    #global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
     startRow = startLocation[0]
     endRow = endLocation[0]
     startColumn = startLocation[1]
@@ -38,6 +37,7 @@ def setStartEndIndices(startLocation, endLocation):
     endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
     startColumnIndex = columnString.find(startColumn)
     endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
+    return startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
     '''Using the above function as a shortcut to define variables may cause problems, vs. just copy-pasting and defining the variables every time a movement function is called.'''
     '''For some reason using the above function for whitePawnMovement() is okay, but it gives an undefined local error for 'startRowIndex' when using for the bishopMovement() function?'''
 
@@ -106,7 +106,7 @@ def movePiece(board, piece, startLocation, endLocation):
 def whitePawnMovement(board, startLocation, endLocation):
     '''Rules for moving a white pawn.'''
 
-    setStartEndIndices(startLocation, endLocation)
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
 
     try:
         if startRow == '2':       #If the pawn starts in row 2, rules dictate that it can move forward one or two spaces.
@@ -161,7 +161,7 @@ def whitePawnMovement(board, startLocation, endLocation):
 def blackPawnMovement(board, startLocation, endLocation):
     '''Rules for moving a black pawn.'''
     # White and black pawn functions might be combined, but would require extra effort. Could use a "turn" function.
-    setStartEndIndices(startLocation, endLocation)
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
 
     try:
         if startRow == '7':       #If the pawn starts in row 7, rules dictate that it can move forward one or two spaces.
@@ -214,7 +214,7 @@ def blackPawnMovement(board, startLocation, endLocation):
 def rookMovement(board, startLocation, endLocation):
     '''Rules for moving a Rook.'''
 
-    setStartEndIndices(startLocation, endLocation)
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
 
     if board[startLocation].startswith('w'):
         turn = 'w'
@@ -265,15 +265,9 @@ def rookMovement(board, startLocation, endLocation):
 
 def bishopMovement(board, startLocation, endLocation):
     '''Rules for moving a bishop.'''
-    startRow = startLocation[0]
-    endRow = endLocation[0]
-    startColumn = startLocation[1]
-    endColumn = endLocation[1]
 
-    startRowIndex = rowString.find(startRow)
-    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
-    startColumnIndex = columnString.find(startColumn)
-    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
+    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
+
 
     if board[startLocation].startswith('w'):
         turn = 'w'
@@ -594,6 +588,8 @@ def kingMovement(board, startLocation, endLocation):
 def whiteMove(board):
     '''This function asks what white piece to move to where. The function provides rules for valid movement.'''
     while True:
+        #Always print the board at the start of the loop, except when game is first started.
+        visualBoard(board)
         startLocation = input(Fore.CYAN + 'White turn!' + Fore.RESET + ' Location of piece you would like to move? Enter row, then column.\n')
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
@@ -625,17 +621,16 @@ def whiteMove(board):
                 validEndCheck = kingMovement(board, startLocation, endLocation)
             if not validEndCheck:
                 print('Invalid move!')
-                visualBoard(board)
                 continue
             else:
                 movePiece(board, piece, startLocation, endLocation)
-                visualBoard(board)
                 break
 
 
 def blackMove(board):
     '''This function asks what black piece to move to where. The function provides rules for valid movement.'''
     while True:
+        visualBoard(board)
         startLocation = input(Fore.RED + 'Black turn! ' + Fore.RESET + 'Location of piece you would like to move? Enter row, then column.\n')
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
@@ -667,11 +662,9 @@ def blackMove(board):
                 validEndCheck = kingMovement(board, startLocation, endLocation)
             if not validEndCheck:
                 print('Invalid move!')
-                visualBoard(board)
                 continue
             else:
                 movePiece(board, piece, startLocation, endLocation)
-                visualBoard(board)
                 break
 
 # A test chessboard that can be set up for testing purposes.
@@ -694,12 +687,11 @@ print(Fore.GREEN + Back.BLACK + ('~' * 131) + Fore.RESET + Back.RESET)
 # Initialize the chessboard. Note that 'testboard' can instead be used for debugging.
 # May want to implement saving, instead of initializing board always.
 chessInit(chessboard)
-visualBoard(testBoard)
 
 # Main program loop.
 while True:
     whiteMove(testBoard)
-    blackMove(testBoard)
+    # blackMove(testBoard)
 
 
 '''visualBoard(testBoard)
@@ -715,7 +707,7 @@ whiteMove(testBoard)
 visualBoard(testBoard)'''
 
 
-# Updated: 5/9/2020 7:10 am
+# Updated: 5/9/2020 4:30 pm
 
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
