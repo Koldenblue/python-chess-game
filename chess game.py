@@ -105,7 +105,8 @@ def movePiece(board, piece, startLocation, endLocation):
 def whitePawnMovement(board, startLocation, endLocation):
     '''Rules for moving a white pawn.'''
 
-    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
+    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
+        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
 
     try:
         if startRow == '2':       #If the pawn starts in row 2, rules dictate that it can move forward one or two spaces.
@@ -126,7 +127,7 @@ def whitePawnMovement(board, startLocation, endLocation):
             elif endRow == '3':
                 if endColumn == columnString[startColumnIndex + 1] and board[endLocation].startswith('b'):  #if moving diagonally to the right, and there is a black piece, the move is valid
                     validEndCheck = True
-                if endColumn == columnString[startColumnIndex - 1] and board[endLocation].startswith('b'):  #diagonally to left. must contain black piece.
+                elif endColumn == columnString[startColumnIndex - 1] and board[endLocation].startswith('b'):  #diagonally to left. must contain black piece.
                     validEndCheck = True
                 else:
                     validEndCheck = False
@@ -160,7 +161,8 @@ def whitePawnMovement(board, startLocation, endLocation):
 def blackPawnMovement(board, startLocation, endLocation):
     '''Rules for moving a black pawn.'''
     # White and black pawn functions might be combined, but would require extra effort. Could use a "turn" function.
-    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
+    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
+        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
 
     try:
         if startRow == '7':       #If the pawn starts in row 7, rules dictate that it can move forward one or two spaces.
@@ -181,7 +183,7 @@ def blackPawnMovement(board, startLocation, endLocation):
             elif endRow == '6':
                 if endColumn == columnString[startColumnIndex + 1] and board[endLocation].startswith('w'):  #if moving diagonally to the right, and there is a white piece, the move is valid
                     validEndCheck = True
-                if endColumn == columnString[startColumnIndex - 1] and board[endLocation].startswith('w'):  #diagonally to left. must contain white piece.
+                elif endColumn == columnString[startColumnIndex - 1] and board[endLocation].startswith('w'):  #diagonally to left. must contain white piece.
                     validEndCheck = True
                 else:
                     validEndCheck = False
@@ -213,11 +215,14 @@ def blackPawnMovement(board, startLocation, endLocation):
 def rookMovement(board, startLocation, endLocation):
     '''Rules for moving a Rook.'''
 
-    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
+    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
+        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
 
+    # Could possibly use a 'turn' function instead. Also these rules can be written more concisely.
+    # For example, the 'while True' loop is unnecessary, and, could just use 'else' instead of elif.
     if board[startLocation].startswith('w'):
         turn = 'w'
-    if board[startLocation].startswith('b'):
+    elif board[startLocation].startswith('b'):
         turn = 'b'
     while True:
         if turn == 'b':              #first check that the endLocation can be moved to
@@ -235,6 +240,7 @@ def rookMovement(board, startLocation, endLocation):
 
     if startRow != endRow and startColumn != endColumn:     #Next check: either the rook must stay in the same row, or in the same column.
         validEndCheck = False
+        return validEndCheck
 
     # Generate a list of the spaces inbetween the start and endpoint.
     # Either row, or column must stay the same.
@@ -250,7 +256,7 @@ def rookMovement(board, startLocation, endLocation):
 
     elif startRow == endRow:      # if moving in a row, then the row doesn't change.
         inBetweenSpaces = []
-        for i in range( min(startColumnIndex, endColumnIndex), max(startColumnIndex, endColumnIndex) ):
+        for i in range( min(startColumnIndex, endColumnIndex), max(startColumnIndex, endColumnIndex)):
             inBetweenSpaces.append(startRow + str(columnString[i]))
         del inBetweenSpaces[0]
 
@@ -265,12 +271,13 @@ def rookMovement(board, startLocation, endLocation):
 def bishopMovement(board, startLocation, endLocation):
     '''Rules for moving a bishop.'''
 
-    startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex = setStartEndIndices(startLocation, endLocation)
+    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
+        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
 
 
     if board[startLocation].startswith('w'):
         turn = 'w'
-    if board[startLocation].startswith('b'):
+    elif board[startLocation].startswith('b'):
         turn = 'b'
 
     if turn == 'b':              #first check that the endLocation can be moved to
@@ -279,7 +286,7 @@ def bishopMovement(board, startLocation, endLocation):
         else:
             validEndCheck = False
             return validEndCheck
-    if turn == 'w':
+    elif turn == 'w':
         if board[endLocation].startswith('b') or board[endLocation] == ' ':
             validEndCheck = True
         else:
@@ -290,7 +297,7 @@ def bishopMovement(board, startLocation, endLocation):
     # If the bishop is moving diagonally up and to the right:
     if startRowIndex < endRowIndex and startColumnIndex < endColumnIndex:
         while True:
-            # Increment the starting row and column until either the end row or end column is reached.
+            # Increment the STARTING row and column until either the ENDING row or column is reached.
             # This loop will give all diagonal movement spaces between startLocation and endLocation.
             if startRowIndex == endRowIndex:
                 break
@@ -302,20 +309,18 @@ def bishopMovement(board, startLocation, endLocation):
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex]) 
 
     # If moving diagonally down and to the right:
-    if startRowIndex > endRowIndex and startColumnIndex < endColumnIndex:
+    elif startRowIndex > endRowIndex and startColumnIndex < endColumnIndex:
         while True:
             if startRowIndex == endRowIndex:
                 break
             if startColumnIndex == endColumnIndex:
                 break
             startRowIndex -= 1
-            print('startRow = ' + str(startRowIndex))
             startColumnIndex += 1
-            print('startColumnIndex = ' + str(startColumnIndex))
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
     
     # If moving diagonally up and to the left:
-    if startRowIndex < endRowIndex and startColumnIndex > endColumnIndex: 
+    elif startRowIndex < endRowIndex and startColumnIndex > endColumnIndex: 
         while True:
             if startRowIndex == endRowIndex:
                 break
@@ -326,7 +331,7 @@ def bishopMovement(board, startLocation, endLocation):
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
     
     # If moving diagonally down and to the left:
-    if startRowIndex > endRowIndex and startColumnIndex > endColumnIndex: 
+    elif startRowIndex > endRowIndex and startColumnIndex > endColumnIndex: 
         while True:
             if startRowIndex == endRowIndex:
                 break
@@ -336,12 +341,14 @@ def bishopMovement(board, startLocation, endLocation):
             startColumnIndex -= 1
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
 
+    # Check that the end location is valid.
     if endLocation not in inBetweenSpaces:
         validEndCheck = False
         return validEndCheck
-
-    del inBetweenSpaces[-1] #inBetweenSpaces[-1] is the destination space. Only the spaces in between the destination and start need to be checked to be empty.
-    #print(inBetweenSpaces) #for debugging
+    
+    # inBetweenSpaces[-1] is the destination space and can now be deleted, 
+    # in order to check that the in between spaces are empty.
+    del inBetweenSpaces[-1] 
     for space in inBetweenSpaces:
         if board[space] != ' ':
             validEndCheck = False
@@ -350,19 +357,13 @@ def bishopMovement(board, startLocation, endLocation):
     return validEndCheck
 
 def knightMovement(board, startLocation, endLocation):
-    startRow = startLocation[0]
-    endRow = endLocation[0]
-    startColumn = startLocation[1]
-    endColumn = endLocation[1]
-
-    startRowIndex = rowString.find(startRow)
-    endRowIndex = rowString.find(endRow)    #unused variable          # row 8 is index 8, row 1 is index 1
-    startColumnIndex = columnString.find(startColumn)
-    endColumnIndex = columnString.find(endColumn)      # unused variable      # column a is index 1, h is 8
+    '''Rules for moving a knight.'''
+    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
+        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
 
     if board[startLocation].startswith('w'):
         turn = 'w'
-    if board[startLocation].startswith('b'):
+    elif board[startLocation].startswith('b'):
         turn = 'b'
 
     if turn == 'b':              # first check that the endLocation can be moved to
@@ -371,18 +372,21 @@ def knightMovement(board, startLocation, endLocation):
         else:
             validEndCheck = False
             return validEndCheck
-    if turn == 'w':
+    elif turn == 'w':
         if board[endLocation].startswith('b') or board[endLocation] == ' ':
             validEndCheck = True
         else:
             validEndCheck = False
             return validEndCheck
 
+    # Making a list of the eight possible spaces a knight can move to.
     validEndLocations = []
-    try:        # making a list of the eight possible spaces a knight can move to
+    try:
         validEndLocations.append(rowString[startRowIndex + 2] + columnString[startColumnIndex + 1])
+    # IndexError will occur if the knight is too close to the edge of the board i.e. the knight can't move off the board
+    # This will happen if index > 8
     except IndexError:
-        pass    # IndexError will occur if the knight is too close to the edge of the board i.e. the knight can't move off the board
+        pass
     try:
         # Make sure the knight can't "wrap" around to the other side of the board with a negative index.
         if startRowIndex - 2 > 0:
@@ -418,7 +422,7 @@ def knightMovement(board, startLocation, endLocation):
             validEndLocations.append(rowString[startRowIndex - 1] + columnString[startColumnIndex - 2])
     except IndexError:
         pass
-    # print(validEndLocations) #print for debugging
+
     # Already checked earlier to make sure the endLocation was empty or has a piece of the opposite color.
     # Now just have to check that endLocation is valid.
     if endLocation in validEndLocations:
@@ -429,18 +433,12 @@ def knightMovement(board, startLocation, endLocation):
 
 def queenMovement(board, startLocation, endLocation):
     '''Rules for moving a queen.'''
-    startRow = startLocation[0]
-    endRow = endLocation[0]
-    startColumn = startLocation[1]
-    endColumn = endLocation[1]
-    startRowIndex = rowString.find(startRow)
-    endRowIndex = rowString.find(endRow)  # Row 8 is index 8, row 1 is index 1
-    startColumnIndex = columnString.find(startColumn)
-    endColumnIndex = columnString.find(endColumn)  # Column a is index 1, h is 8
+    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
+        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
 
     if board[startLocation].startswith('w'):
         turn = 'w'
-    if board[startLocation].startswith('b'):
+    elif board[startLocation].startswith('b'):
         turn = 'b'
 
     if turn == 'b':
@@ -449,7 +447,7 @@ def queenMovement(board, startLocation, endLocation):
         else:
             validEndCheck = False
             return validEndCheck
-    if turn == 'w':
+    elif turn == 'w':
         if board[endLocation].startswith('b') or board[endLocation] == ' ':
             validEndCheck = True
         else:
@@ -472,24 +470,29 @@ def queenMovement(board, startLocation, endLocation):
             # Keep appending the diagonal movement positions until endLocation is reached.
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
         # The destination space needs to be removed, as it is not "in between".
+        # Check that the end location is valid.
+        if endLocation not in inBetweenSpaces:
+            validEndCheck = False
+            return validEndCheck
         del inBetweenSpaces[-1]
 
     # If moving diagonally down and to the right:
-    if startRowIndex > endRowIndex and startColumnIndex < endColumnIndex:
+    elif startRowIndex > endRowIndex and startColumnIndex < endColumnIndex:
         while True:
             if startRowIndex == endRowIndex:
                 break
             if startColumnIndex == endColumnIndex:
                 break
             startRowIndex -= 1
-            print('startRow = ' + str(startRowIndex))
             startColumnIndex += 1
-            print('startColumnIndex = ' + str(startColumnIndex))
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
+        if endLocation not in inBetweenSpaces:
+            validEndCheck = False
+            return validEndCheck
         del inBetweenSpaces[-1]
 
     # If moving diagonally up and to the left:
-    if startRowIndex < endRowIndex and startColumnIndex > endColumnIndex: 
+    elif startRowIndex < endRowIndex and startColumnIndex > endColumnIndex: 
         while True:
             if startRowIndex == endRowIndex:
                 break
@@ -498,10 +501,13 @@ def queenMovement(board, startLocation, endLocation):
             startRowIndex += 1
             startColumnIndex -= 1
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
+        if endLocation not in inBetweenSpaces:
+            validEndCheck = False
+            return validEndCheck
         del inBetweenSpaces[-1]
 
     # If moving diagonally down and to the left:
-    if startRowIndex > endRowIndex and startColumnIndex > endColumnIndex: 
+    elif startRowIndex > endRowIndex and startColumnIndex > endColumnIndex: 
         while True:
             if startRowIndex == endRowIndex:
                 break
@@ -510,9 +516,12 @@ def queenMovement(board, startLocation, endLocation):
             startRowIndex -= 1
             startColumnIndex -= 1
             inBetweenSpaces.append(rowString[startRowIndex] + columnString[startColumnIndex])
+        if endLocation not in inBetweenSpaces:
+            validEndCheck = False
+            return validEndCheck
         del inBetweenSpaces[-1]
 
-    if startColumn == endColumn:
+    elif startColumn == endColumn:
         for i in range(min(startRowIndex, endRowIndex), max(startRowIndex, endRowIndex)):
             inBetweenSpaces.append(str(rowString[i]) + startColumn)
         # inBetweenSpaces[0] will either be startLocation or endLocation.
@@ -521,7 +530,7 @@ def queenMovement(board, startLocation, endLocation):
             # the remaining spaces in inBetweenSpaces are indeed the in between spaces.
         del inBetweenSpaces[0]
 
-    if startRow == endRow:
+    elif startRow == endRow:
         for i in range(min(startColumnIndex, endColumnIndex), max(startColumnIndex, endColumnIndex)):
             inBetweenSpaces.append(startRow + str(columnString[i]))
         del inBetweenSpaces[0]
@@ -535,20 +544,68 @@ def queenMovement(board, startLocation, endLocation):
     # If the code reaches this point, validEndCheck returns True.
     return validEndCheck
 
+def threatenedByBlack(board):
+    threatenedSpaces = []
+    # First loop through all the potential threatening pieces. Only black pieces for this function.
+    for startLocation, threateningPiece in board.items():
+        # For each threatening piece, starting with the black rook here:
+        if threateningPiece == 'bR':
+            # First find all empty spaces.
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = rookMovement(board, startLocation, endLocation)
+                    # If the empty space is a valid movement location, add to threatened spaces.
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bB':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = bishopMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bN':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = knightMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bQ':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = queenMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bK':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = kingMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        # Need to make a special case for pawns, since pawns cannot capture pieces directly in front of them.
+        # Also, pawns can move diagonally only if a piece is present in that space!
+        if threateningPiece == 'bp':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    # Create a temporary "ghost" king to check if the pawn can move diagonally to capture it.
+                    board[endLocation] = 'wK'
+                    startColumn = startLocation[1]
+                    endColumn = endLocation[1]
+                    validEndCheck = blackPawnMovement(board, startLocation, endLocation)
+                    if validEndCheck and startColumn != endColumn:
+                        threatenedSpaces.append(endLocation)
+                    board[endLocation] = ' '
+    return threatenedSpaces
+
+# def threatenedByWhite:
+
 def kingMovement(board, startLocation, endLocation):
     '''Rules for moving a king.'''
-    startRow = startLocation[0]
-    endRow = endLocation[0]
-    startColumn = startLocation[1]
-    endColumn = endLocation[1]
-    startRowIndex = rowString.find(startRow)
-    endRowIndex = rowString.find(endRow)  # Row 8 is index 8, row 1 is index 1
-    startColumnIndex = columnString.find(startColumn)
-    endColumnIndex = columnString.find(endColumn)  # Column a is index 1, h is 8
+    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
+        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
 
     if board[startLocation].startswith('w'):
         turn = 'w'
-    if board[startLocation].startswith('b'):
+    elif board[startLocation].startswith('b'):
         turn = 'b'
 
     if turn == 'b':
@@ -557,7 +614,7 @@ def kingMovement(board, startLocation, endLocation):
         else:
             validEndCheck = False
             return validEndCheck
-    if turn == 'w':
+    elif turn == 'w':
         if board[endLocation].startswith('b') or board[endLocation] == ' ':
             validEndCheck = True
         else:
@@ -577,10 +634,18 @@ def kingMovement(board, startLocation, endLocation):
         if space == startLocation:
             validEndLocations.remove(space)
 
-    print(validEndLocations)
     if endLocation not in validEndLocations:
         validEndCheck = False
         return validEndCheck
+    
+    threatenedSpaces = []
+    if turn == 'w':
+        threatenedSpaces = threatenedByBlack(board)
+        if endLocation in threatenedSpaces:
+            print('King cannot enter that space! Space is threatened!')
+            validEndCheck = False
+            return validEndCheck
+    #if turn == 'b':
 
     return validEndCheck
 
@@ -711,4 +776,4 @@ visualBoard(testBoard)'''
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
 rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
-
+# Undo function?
