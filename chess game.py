@@ -15,16 +15,8 @@ for rowNum in rows:
 for position in positions:
     chessboard[position] = ' '      #Now chessboard is a dictionary of all positions with empty spaces as the values.
 
-# This next block of code is unnecessary at this point. Lists colors, pieces, and pieces belonging to each color.
-pieceColors = ['w', 'b'] 
-pieces = ['p', 'R', 'B', 'N', 'Q', 'K']
-blackPieces = []
-whitePieces = []
-for piece in pieces:
-    whitePieces.append(pieceColors[0] + piece)
-    blackPieces.append(pieceColors[1] + piece)
-allPieces = whitePieces + blackPieces
-
+# current_turn is used for checking spaces threatened by the king, in order to avoid a recursive loop
+current_turn = 'w'
 
 def setStartEndIndices(startLocation, endLocation):
     '''Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.'''
@@ -545,6 +537,8 @@ def queenMovement(board, startLocation, endLocation):
     return validEndCheck
 
 def threatenedByBlack(board):
+    '''A function that makes a list of all spaces threatened by black pieces. 
+    Only checks empty spaces.'''
     threatenedSpaces = []
     # First loop through all the potential threatening pieces. Only black pieces for this function.
     for startLocation, threateningPiece in board.items():
@@ -596,7 +590,110 @@ def threatenedByBlack(board):
                     board[endLocation] = ' '
     return threatenedSpaces
 
-# def threatenedByWhite:
+def threatenedByWhite(board):
+    threatenedSpaces = []
+    # First loop through all the potential threatening pieces. Only white pieces for this function.
+    for startLocation, threateningPiece in board.items():
+        # For each threatening piece, starting with the white rook here:
+        if threateningPiece == 'wR':
+            # First find all empty spaces.
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = rookMovement(board, startLocation, endLocation)
+                    # If the empty space is a valid movement location, add to threatened spaces.
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wB':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = bishopMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wN':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = knightMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wQ':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = queenMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wK':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = kingMovement(board, startLocation, endLocation)
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        # Need to make a special case for pawns, since pawns cannot capture pieces directly in front of them.
+        # Also, pawns can move diagonally only if a piece is present in that space!
+        if threateningPiece == 'wp':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    # Create a temporary "ghost" king to check if the pawn can move diagonally to capture it.
+                    board[endLocation] = 'bK'
+                    startColumn = startLocation[1]
+                    endColumn = endLocation[1]
+                    validEndCheck = whitePawnMovement(board, startLocation, endLocation)
+                    if validEndCheck and startColumn != endColumn:
+                        threatenedSpaces.append(endLocation)
+                    board[endLocation] = ' '
+    return threatenedSpaces
+
+def whiteKingCheck(board, whiteKingLocation):
+    # run check at the end of every turn to see if king is in check
+    # First, if current turn movement places your own king in check, then move is invalid
+    # Second, look to see if enemy king is in check
+    # If king is in check on current turn, only valid movement is movement that removes check
+    # If no movement possible, then checkmate
+
+    # King is in check if threatenedBy function lists the king's space as threatened
+
+    #added as argument to function instead:
+    '''# First find the king's location.
+    for location, piece in board.items():
+        if piece == 'wK':
+            whiteKingLocation = location'''
+    
+    # Next, check to see if king is threatened.
+    # Need to be careful about king loops!
+    for startLocation, threateningPiece in board.items():
+        if threateningPiece == 'bR':
+            validEndCheck = rookMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bB':
+            validEndCheck = bishopMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bN':
+            validEndCheck = knightMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bQ':
+            validEndCheck = queenMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        # Unlike normal rules, the king can take the enemy king, even if the king would then be placed in check!
+        # Need to add exceptions for this special case.
+        if threateningPiece == 'bK':
+            validEndCheck = kingMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bp':
+            validEndCheck = blackPawnMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+    return False
+        
+def blackKingCheck(board):
+    for location, piece in board.items():
+        if piece == 'bK':
+            blackKingLocation = location
+
+# def checkmate:
 
 def kingMovement(board, startLocation, endLocation):
     '''Rules for moving a king.'''
@@ -639,18 +736,24 @@ def kingMovement(board, startLocation, endLocation):
         return validEndCheck
     
     threatenedSpaces = []
-    if turn == 'w':
+    # turn must equal current_turn in order to avoid a recursive loop of checking whether kings can threaten a space!
+    if current_turn == 'w' and current_turn == turn:
         threatenedSpaces = threatenedByBlack(board)
         if endLocation in threatenedSpaces:
             print('King cannot enter that space! Space is threatened!')
             validEndCheck = False
             return validEndCheck
-    #if turn == 'b':
-
+    if current_turn == 'b' and current_turn == turn:
+        threatenedSpaces = threatenedByWhite(board)
+        if endLocation in threatenedSpaces:
+            print('King cannot enter that space! Space is threatened!')
+            validEndCheck = False
+            return validEndCheck
     return validEndCheck
 
 def whiteMove(board):
     '''This function asks what white piece to move to where. The function provides rules for valid movement.'''
+    current_turn = 'w'
     while True:
         #Always print the board at the start of the loop, except when game is first started.
         visualBoard(board)
@@ -690,9 +793,9 @@ def whiteMove(board):
                 movePiece(board, piece, startLocation, endLocation)
                 break
 
-
 def blackMove(board):
     '''This function asks what black piece to move to where. The function provides rules for valid movement.'''
+    current_turn = 'b'
     while True:
         visualBoard(board)
         startLocation = input(Fore.RED + 'Black turn! ' + Fore.RESET + 'Location of piece you would like to move? Enter row, then column.\n')
@@ -735,7 +838,7 @@ def blackMove(board):
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
     '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': 'bp', '7e': 'bp', '7f': 'bp', '7g': 'bp', '7h': 'bp',
     '6a': 'wp', '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ',
-    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wQ', '5e': ' ', '5f': ' ', '5g': 'wK', '5h': ' ',
+    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wQ', '5e': ' ', '5f': ' ', '5g': 'wK', '5h': 'bK',
     '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ', '4g': ' ', '4h': ' ',
     '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ',
     '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ',
@@ -748,11 +851,12 @@ print('Type "exit" at any time to quit.')  # Exiting is inelegant, but works whe
 print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 print(Fore.GREEN + Back.BLACK + ('~' * 131) + Fore.RESET + Back.RESET)
 
-# Initialize the chessboard. Note that 'testboard' can instead be used for debugging.
+# Initialize the chessboard. Note that 'testBoard' can instead be used for debugging.
 # May want to implement saving, instead of initializing board always.
 chessInit(chessboard)
 
-# Main program loop.
+# Main program loop. blackMove can be commented out for testing purposes.
+# testBoard can be used instead of chessboard for testing.
 while True:
     whiteMove(testBoard)
     # blackMove(testBoard)
@@ -771,9 +875,20 @@ whiteMove(testBoard)
 visualBoard(testBoard)'''
 
 
-# Updated: 5/9/2020 4:30 pm
+# Updated: 5/14/2020 7:30 am
 
 #TODO:
 ''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
 rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
 # Undo function?
+
+
+# This next block of code is unnecessary at this point. Lists colors, pieces, and pieces belonging to each color.
+'''pieceColors = ['w', 'b'] 
+pieces = ['p', 'R', 'B', 'N', 'Q', 'K']
+blackPieces = []
+whitePieces = []
+for piece in pieces:
+    whitePieces.append(pieceColors[0] + piece)
+    blackPieces.append(pieceColors[1] + piece)
+allPieces = whitePieces + blackPieces'''
