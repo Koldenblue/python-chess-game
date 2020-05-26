@@ -7,64 +7,55 @@ rows = tuple('87654321')        #a tuple of the rows.
 columns = tuple('abcdefgh')     #a tuple of the columns.
 rowString = '012345678'         #Row 1 is index 1, row 2 is index 2, etc.
 columnString = '0abcdefgh'      #Column a is index 1, column b is index 2, etc.
-chessboard = {}
+
+
+# Positions is a list of all valid positions.
+# It is used as keys to populate chessboard{}, which has positions as the keys and empty spaces as the values.
 positions = []
+chessboard = {}
 for rowNum in rows:
     for columnLetter in columns:
-        positions.append(rowNum + columnLetter)     #Positions is a list of all valid positions.
+        positions.append(rowNum + columnLetter)
 for position in positions:
-    chessboard[position] = ' '      #Now chessboard is a dictionary of all positions with empty spaces as the values.
+    chessboard[position] = ' '
 
-# This next block of code is unnecessary at this point. Lists colors, pieces, and pieces belonging to each color.
-pieceColors = ['w', 'b'] 
-pieces = ['p', 'R', 'B', 'N', 'Q', 'K']
-blackPieces = []
-whitePieces = []
-for piece in pieces:
-    whitePieces.append(pieceColors[0] + piece)
-    blackPieces.append(pieceColors[1] + piece)
-allPieces = whitePieces + blackPieces
+# current_turn is used for checking spaces threatened by the king, in order to avoid an infinite loop
+current_turn = 'w'
 
+# A global bool that gets marked True when the threatenedBy functions are called,
+# so that the threatenedBy() functions will not check for 'check' when finding valid movements.
+checkingForThreatened = False
 
-def setStartEndIndices(startLocation, endLocation):
-    '''Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.'''
-    # Simply setting variables as global doesn't seem to always work. Instead, return the eight variables.
-    # global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
-    startRow = startLocation[0]
-    endRow = endLocation[0]
-    startColumn = startLocation[1]
-    endColumn = endLocation[1]
-    startRowIndex = rowString.find(startRow)
-    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
-    startColumnIndex = columnString.find(startColumn)
-    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
-    return startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
+# The kings start the game not in check.
+# These variables need to be used to limit possible moves during a turn, if a king is in check.
+whiteKingInCheck = False
+blackKingInCheck = False
 
 def visualBoard(playstate):
     '''Prints a graphic version of all the pieces on the chessboard.'''
     print('\n')
     for column in columns:
-        print(column.center(7), end = '')       #First print the column letters.
-    print('\n' + '_' + '_' * ((6*8)+8))         #Next print the line on top of the board.
+        print(column.center(7), end = '')       # First print the column letters.
+    print('\n' + '_' + '_' * ((6*8)+8))         # Next print the line on top of the board.
     print('|', end = '')
     space = 0
     rowNum = 8
-    for v in playstate.values():                    #Next print the board, using the pieces listed in the chessboard dictionary.
+    for v in playstate.values():                # Next print the board, using the pieces listed in the chessboard dictionary.
         if v.startswith('w'):
             print(Fore.CYAN + v.center(6) + Fore.WHITE + '|', end = '')
             space += 1
         elif v.startswith('b'):
             print(Fore.RED + v.center(6) + Fore.WHITE + '|', end = '' )
             space += 1
-        else:                                           #For all spaces, print a colored red or white piece or an empty space.
+        else:                                   # For all spaces, print a colored red or cyan piece or an empty space.
             print(v.center(6) + '|', end = '')
             space += 1
-        if space == 64:                                 #There are 64 spaces on the board. At the end of the 64th space, row num '1' is printed.
+        if space == 64:                         # There are 64 spaces on the board. At the end of the 64th space, row num '1' is printed.
             print('  ' + str(rowNum), end='')
-        elif space % 8 == 0 and space < 64:             #at the end of each row of 8 spaces, print the row number, then subtract rowNum by 1 in order to get the next rowNum. Then print the lines between rows.
+        elif space % 8 == 0 and space < 64:     # At the end of each row of 8 spaces, print the row number, then subtract rowNum by 1 in order to get the next rowNum. Then print the lines between rows.
             print('  ' + str(rowNum), end='')
             rowNum -= 1
-            print('\n', end = '')               #Note that rowNum '1' isn't printed, because if it were, then the next row of '|' and '-' is also printed.
+            print('\n', end = '')               # Note that rowNum '1' isn't printed, because if it were, then the next row of '|' and '-' is also printed.
             print('|' + (('-' * 6 +'|') * 8))
             print('|', end = '')
     print('\n' + chr(175) + (chr(175) * ((6*8)+8)))         #Print the line on the bottom of the board.
@@ -72,8 +63,8 @@ def visualBoard(playstate):
 def chessInit(board):
     '''This function initializes the starting positions of the chessboard.'''
     for k in board.keys():
-        board[k] = ' '     #Erase the board.
-    board['8a'] = 'bR'      #Then initialize the piece locations.
+        board[k] = ' '      # Erase the board.
+    board['8a'] = 'bR'      # Then initialize the piece locations.
     board['8b'] = 'bB'
     board['8c'] = 'bN'
     board['8d'] = 'bQ'
@@ -82,7 +73,7 @@ def chessInit(board):
     board['8g'] = 'bB'
     board['8h'] = 'bR'
     for k in board.keys():
-        if k.startswith('7'):   #initializing the rows of pawns.
+        if k.startswith('7'):   # Initializing the rows of pawns.
             board[k] = 'bp'
         if k.startswith('2'):
             board[k] = 'wp'
@@ -101,12 +92,25 @@ def movePiece(board, piece, startLocation, endLocation):
     if board[endLocation] != ' ':
         print(board[endLocation] + ' has been captured!')
     board[endLocation] = piece
+    # If a king was moved, the keys for the kingLocation global variables need to be updated.
+    if piece == 'wK': 
+        global globalWhiteKing
+        globalWhiteKing = endLocation
+    if piece == 'bK':
+        global globalBlackKing
+        globalBlackKing = endLocation
 
 def whitePawnMovement(board, startLocation, endLocation):
     '''Rules for moving a white pawn.'''
 
-    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
-        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
+    startRow = startLocation[0]
+    endRow = endLocation[0]
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+    startRowIndex = rowString.find(startRow)
+    # row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    # column a is index 1, h is 8
 
     try:
         if startRow == '2':       #If the pawn starts in row 2, rules dictate that it can move forward one or two spaces.
@@ -156,13 +160,42 @@ def whitePawnMovement(board, startLocation, endLocation):
             validEndCheck = False
     except IndexError:
         validEndCheck = False
+
+    # Finally, check whether any kings are placed in check. Temporarily move the piece in order to do this.
+    # This code gets passed over if one of the threatenedBy() functions called this movement function. 
+    # In other words, this code is only checked if the piece in question is the user entered piece!
+    global checkingForThreatened
+    global whiteKingInCheck
+    global blackKingInCheck
+    if checkingForThreatened == False:
+        if current_turn == 'w':
+            tempMovingPiece = board[startLocation]
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'wp'
+            board[startLocation] = ' '
+            if whiteKingCheck(board, globalWhiteKing):
+                print("White King would be in check!")
+                validEndCheck = False
+            elif blackKingCheck(board, globalBlackKing):
+                print(Fore.RED + "Black King is in check!" + Fore.RESET)
+                blackKingInCheck = True
+            board[startLocation] = 'wp'
+            board[endLocation] = tempRemovedPiece
+    checkingForThreatened = False
+
     return validEndCheck
 
 def blackPawnMovement(board, startLocation, endLocation):
     '''Rules for moving a black pawn.'''
     # White and black pawn functions might be combined, but would require extra effort. Could use a "turn" function.
-    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
-        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
+    startRow = startLocation[0]
+    endRow = endLocation[0]
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+    startRowIndex = rowString.find(startRow)
+    # row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    # column a is index 1, h is 8
 
     try:
         if startRow == '7':       #If the pawn starts in row 7, rules dictate that it can move forward one or two spaces.
@@ -210,33 +243,62 @@ def blackPawnMovement(board, startLocation, endLocation):
             validEndCheck = False
     except IndexError:
         validEndCheck = False
+    
+    global whiteKingInCheck
+    global blackKingInCheck
+    global checkingForThreatened
+    if checkingForThreatened == False:
+        if current_turn == 'b':
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'bp'
+            board[startLocation] = ' '
+            if blackKingCheck(board, globalBlackKing):
+                print("Black King would be in check!")
+                validEndCheck = False
+            elif whiteKingCheck(board, globalWhiteKing):
+                print(Fore.CYAN + "White King is in check!" + Fore.RESET)
+                blackKingInCheck = True
+            board[startLocation] = 'bp'
+            board[endLocation] = tempRemovedPiece
+    checkingForThreatened = False
     return validEndCheck
 
 def rookMovement(board, startLocation, endLocation):
     '''Rules for moving a Rook.'''
 
-    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
-        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
+    startRow = startLocation[0]
+    endRow = endLocation[0]
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+    startRowIndex = rowString.find(startRow)
+    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
 
     # Could possibly use a 'turn' function instead. Also these rules can be written more concisely.
-    # For example, the 'while True' loop is unnecessary, and, could just use 'else' instead of elif.
+    # Could just use 'else' instead of elif, but 'elif' makes conditions clearer.
     if board[startLocation].startswith('w'):
         turn = 'w'
     elif board[startLocation].startswith('b'):
         turn = 'b'
-    while True:
-        if turn == 'b':              #first check that the endLocation can be moved to
-            if board[endLocation].startswith('w') or board[endLocation] == ' ': # if moving a black rook, if the end location has a white piece or is empty, return true
-                validEndCheck = True
-            else:
-                validEndCheck = False
-            break
-        elif turn == 'w':
-            if board[endLocation].startswith('b') or board[endLocation] == ' ':
-                validEndCheck = True
-            else:
-                validEndCheck = False
-            break
+    # First check that the endLocation can be moved to
+    # If moving a black rook and the end location has a white piece or is empty, is valid
+
+    if turn == 'b':
+        if board[endLocation].startswith('w') or board[endLocation] == ' ':
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck
+
+    elif turn == 'w':
+        if board[endLocation].startswith('b') or board[endLocation] == ' ':
+            validEndCheck = True
+        else:
+            validEndCheck = False
+            return validEndCheck
+
+
 
     if startRow != endRow and startColumn != endColumn:     #Next check: either the rook must stay in the same row, or in the same column.
         validEndCheck = False
@@ -266,13 +328,51 @@ def rookMovement(board, startLocation, endLocation):
             validEndCheck = False
             return validEndCheck
 
+    # Finally, check whether any kings are placed in check. Temporarily move the piece in order to do this.
+    global checkingForThreatened
+    global whiteKingInCheck
+    global blackKingInCheck
+    if checkingForThreatened == False:
+        if current_turn == 'w':
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'wR'
+            board[startLocation] = ' '
+            if whiteKingCheck(board, globalWhiteKing):
+                print("White King would be in check!")
+                validEndCheck = False
+            elif blackKingCheck(board, globalBlackKing):
+                print(Fore.RED + "Black King is in check!" + Fore.RESET)
+                blackKingInCheck = True
+            board[startLocation] = 'wR'
+            board[endLocation] = tempRemovedPiece
+
+        elif current_turn == 'b':     # Could just use 'else' here instead, but might be less clear. 
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'bR'
+            board[startLocation] = ' '
+            if blackKingCheck(board, globalBlackKing):
+                print("Black King would be in check!")
+                validEndCheck = False
+            elif whiteKingCheck(board, globalWhiteKing):
+                print(Fore.CYAN + "White King is in check!" + Fore.RESET)
+                whiteKingInCheck = True
+            board[startLocation] = 'bR'
+            board[endLocation] = tempRemovedPiece
+    checkingForThreatened = False
+    # Return True at the end of function if all requirements are met.
     return validEndCheck
 
 def bishopMovement(board, startLocation, endLocation):
     '''Rules for moving a bishop.'''
 
-    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
-        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
+    startRow = startLocation[0]
+    endRow = endLocation[0]
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+    startRowIndex = rowString.find(startRow)
+    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
 
 
     if board[startLocation].startswith('w'):
@@ -354,12 +454,49 @@ def bishopMovement(board, startLocation, endLocation):
             validEndCheck = False
             return validEndCheck
 
+    # Finally, check whether any kings are placed in check. Temporarily move the piece in order to do this.
+    global checkingForThreatened
+    global whiteKingInCheck
+    global blackKingInCheck
+    if checkingForThreatened == False:
+        if current_turn == 'w':
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'wB'
+            board[startLocation] = ' '
+            if whiteKingCheck(board, globalWhiteKing):
+                print("White King would be in check!")
+                validEndCheck = False
+            elif blackKingCheck(board, globalBlackKing):
+                print(Fore.RED + "Black King is in check!" + Fore.RESET)
+                blackKingInCheck = True
+            board[startLocation] = 'wB'
+            board[endLocation] = tempRemovedPiece
+
+        elif current_turn == 'b':     # Could just use 'else' here instead, but might be less clear. 
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'bB'
+            board[startLocation] = ' '
+            if blackKingCheck(board, globalBlackKing):
+                print("Black King would be in check!")
+                validEndCheck = False
+            elif whiteKingCheck(board, globalWhiteKing):
+                print(Fore.CYAN + "White King is in check!" + Fore.RESET)
+                whiteKingInCheck = True
+            board[startLocation] = 'bB'
+            board[endLocation] = tempRemovedPiece
+    checkingForThreatened = False
+
     return validEndCheck
 
 def knightMovement(board, startLocation, endLocation):
     '''Rules for moving a knight.'''
-    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
-        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
+
+    startRow = startLocation[0]
+    startColumn = startLocation[1]
+    startRowIndex = rowString.find(startRow)
+    # row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    # column a is index 1, h is 8
 
     if board[startLocation].startswith('w'):
         turn = 'w'
@@ -429,12 +566,53 @@ def knightMovement(board, startLocation, endLocation):
         validEndCheck = True
     else:
         validEndCheck = False
+        return validEndCheck
+
+    # Finally, check whether any kings are placed in check. Temporarily move the piece in order to do this.
+    global checkingForThreatened
+    global whiteKingInCheck
+    global blackKingInCheck
+    if checkingForThreatened == False:
+        if current_turn == 'w':
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'wN'
+            board[startLocation] = ' '
+            if whiteKingCheck(board, globalWhiteKing):
+                print("White King would be in check!")
+                validEndCheck = False
+            elif blackKingCheck(board, globalBlackKing):
+                print(Fore.RED + "Black King is in check!" + Fore.RESET)
+                blackKingInCheck = True
+            board[startLocation] = 'wN'
+            board[endLocation] = tempRemovedPiece
+
+        elif current_turn == 'b':     # Could just use 'else' here instead, but might be less clear. 
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'bN'
+            board[startLocation] = ' '
+            if blackKingCheck(board, globalBlackKing):
+                print("Black King would be in check!")
+                validEndCheck = False
+            elif whiteKingCheck(board, globalWhiteKing):
+                print(Fore.CYAN + "White King is in check!" + Fore.RESET)
+                whiteKingInCheck = True
+            board[startLocation] = 'bN'
+            board[endLocation] = tempRemovedPiece
+    checkingForThreatened = False
+    
     return validEndCheck
 
 def queenMovement(board, startLocation, endLocation):
     '''Rules for moving a queen.'''
-    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
-        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
+
+    startRow = startLocation[0]
+    endRow = endLocation[0]
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+    startRowIndex = rowString.find(startRow)
+    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
 
     if board[startLocation].startswith('w'):
         turn = 'w'
@@ -541,67 +719,49 @@ def queenMovement(board, startLocation, endLocation):
             validEndCheck = False
             return validEndCheck
 
-    # If the code reaches this point, validEndCheck returns True.
+    # Finally, check whether any kings are placed in check. Temporarily move the piece in order to do this.
+    global checkingForThreatened
+    global whiteKingInCheck
+    global blackKingInCheck
+    if checkingForThreatened == False:
+        if current_turn == 'w':
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'wQ'
+            board[startLocation] = ' '
+            if whiteKingCheck(board, globalWhiteKing):
+                print("White King would be in check!")
+                validEndCheck = False
+            elif blackKingCheck(board, globalBlackKing):
+                print(Fore.RED + "Black King is in check!" + Fore.RESET)
+                blackKingInCheck = True
+            board[startLocation] = 'wQ'
+            board[endLocation] = tempRemovedPiece
+
+        elif current_turn == 'b':     # Could just use 'else' here instead, but might be less clear. 
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'bQ'
+            board[startLocation] = ' '
+            if blackKingCheck(board, globalBlackKing):
+                print("Black King would be in check!")
+                validEndCheck = False
+            elif whiteKingCheck(board, globalWhiteKing):
+                print(Fore.CYAN + "White King is in check!" + Fore.RESET)
+                whiteKingInCheck = True
+            board[startLocation] = 'bQ'
+            board[endLocation] = tempRemovedPiece
+
+    checkingForThreatened = False
+    # If the code reaches this point, validEndCheck returns True (unless king in check makes it false).
     return validEndCheck
-
-def threatenedByBlack(board):
-    threatenedSpaces = []
-    # First loop through all the potential threatening pieces. Only black pieces for this function.
-    for startLocation, threateningPiece in board.items():
-        # For each threatening piece, starting with the black rook here:
-        if threateningPiece == 'bR':
-            # First find all empty spaces.
-            for endLocation in board.keys():
-                if board[endLocation] == ' ':
-                    validEndCheck = rookMovement(board, startLocation, endLocation)
-                    # If the empty space is a valid movement location, add to threatened spaces.
-                    if validEndCheck:
-                        threatenedSpaces.append(endLocation)
-        if threateningPiece == 'bB':
-            for endLocation in board.keys():
-                if board[endLocation] == ' ':
-                    validEndCheck = bishopMovement(board, startLocation, endLocation)
-                    if validEndCheck:
-                        threatenedSpaces.append(endLocation)
-        if threateningPiece == 'bN':
-            for endLocation in board.keys():
-                if board[endLocation] == ' ':
-                    validEndCheck = knightMovement(board, startLocation, endLocation)
-                    if validEndCheck:
-                        threatenedSpaces.append(endLocation)
-        if threateningPiece == 'bQ':
-            for endLocation in board.keys():
-                if board[endLocation] == ' ':
-                    validEndCheck = queenMovement(board, startLocation, endLocation)
-                    if validEndCheck:
-                        threatenedSpaces.append(endLocation)
-        if threateningPiece == 'bK':
-            for endLocation in board.keys():
-                if board[endLocation] == ' ':
-                    validEndCheck = kingMovement(board, startLocation, endLocation)
-                    if validEndCheck:
-                        threatenedSpaces.append(endLocation)
-        # Need to make a special case for pawns, since pawns cannot capture pieces directly in front of them.
-        # Also, pawns can move diagonally only if a piece is present in that space!
-        if threateningPiece == 'bp':
-            for endLocation in board.keys():
-                if board[endLocation] == ' ':
-                    # Create a temporary "ghost" king to check if the pawn can move diagonally to capture it.
-                    board[endLocation] = 'wK'
-                    startColumn = startLocation[1]
-                    endColumn = endLocation[1]
-                    validEndCheck = blackPawnMovement(board, startLocation, endLocation)
-                    if validEndCheck and startColumn != endColumn:
-                        threatenedSpaces.append(endLocation)
-                    board[endLocation] = ' '
-    return threatenedSpaces
-
-# def threatenedByWhite:
 
 def kingMovement(board, startLocation, endLocation):
     '''Rules for moving a king.'''
-    (startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex,
-        startColumnIndex, endColumnIndex) = setStartEndIndices(startLocation, endLocation)
+    startRow = startLocation[0]
+    startColumn = startLocation[1]
+    startRowIndex = rowString.find(startRow)
+    # row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    # column a is index 1, h is 8
 
     if board[startLocation].startswith('w'):
         turn = 'w'
@@ -639,21 +799,505 @@ def kingMovement(board, startLocation, endLocation):
         return validEndCheck
     
     threatenedSpaces = []
-    if turn == 'w':
-        threatenedSpaces = threatenedByBlack(board)
-        if endLocation in threatenedSpaces:
-            print('King cannot enter that space! Space is threatened!')
-            validEndCheck = False
-            return validEndCheck
-    #if turn == 'b':
+    # turn must equal current_turn in order to avoid an infinite loop of checking whether kings can threaten a space!
+    global checkingForThreatened
+    global whiteKingInCheck
+    global blackKingInCheck
+    global globalWhiteKing
+    global globalBlackKing
+    if checkingForThreatened == False:
+        if current_turn == 'w' and current_turn == turn:
+            threatenedSpaces = threatenedByBlack(board)
+            if endLocation in threatenedSpaces:
+                print('King cannot enter that space! Space is threatened!')
+                validEndCheck = False
+                return validEndCheck
+        if current_turn == 'b' and current_turn == turn:
+            threatenedSpaces = threatenedByWhite(board)
+            if endLocation in threatenedSpaces:
+                print('King cannot enter that space! Space is threatened!')
+                validEndCheck = False
+                return validEndCheck
 
+    # Finally, check whether any kings are placed in check. Temporarily move the piece in order to do this.
+    # Already checked earlier to see if king could move into space without being threatened.
+    if checkingForThreatened == False:
+        if current_turn == 'w':
+            tempRemovedPiece = board[endLocation]
+            globalWhiteKing = endLocation
+            board[endLocation] = 'wK'
+            board[startLocation] = ' '
+            if blackKingCheck(board, globalBlackKing):
+                print(Fore.RED + "Black King is in check!" + Fore.RESET)
+                blackKingInCheck = True
+            board[startLocation] = 'wK'
+            globalWhiteKing = startLocation
+            board[endLocation] = tempRemovedPiece
+
+        elif current_turn == 'b':     # Could just use 'else' here instead, but might be less clear. 
+            tempRemovedPiece = board[endLocation]
+            board[endLocation] = 'bK'
+            globalBlackKing = endLocation
+            board[startLocation] = ' '
+            if whiteKingCheck(board, globalWhiteKing):
+                print(Fore.CYAN + "White King is in check!" + Fore.RESET)
+                whiteKingInCheck = True
+            board[startLocation] = 'bK'
+            globalBlackKing = startLocation
+            board[endLocation] = tempRemovedPiece
+
+    checkingForThreatened = False
     return validEndCheck
+
+def threatenedByBlack(board):
+    '''A function that makes a list of all spaces threatened by black pieces. 
+    Only checks empty spaces.'''
+    threatenedSpaces = []
+    # First loop through all the potential threatening pieces. Only black pieces for this function.
+    for startLocation, threateningPiece in board.items():
+        global checkingForThreatened
+        checkingForThreatened = True
+        # For each threatening piece, starting with the black rook here:
+        if threateningPiece == 'bR':
+            # First find all empty spaces.
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = rookMovement(board, startLocation, endLocation)
+                    # After each check, reset the checkingForThreatened variable to True.
+                    checkingForThreatened = True
+                    # If the empty space is a valid movement location, add to threatened spaces.
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bB':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = bishopMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bN':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = knightMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bQ':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = queenMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'bK':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = kingMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        # Need to make a special case for pawns, since pawns cannot capture pieces directly in front of them.
+        # Also, pawns can move diagonally only if a piece is present in that space!
+        if threateningPiece == 'bp':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    # Create a temporary "ghost" to check if the pawn can move diagonally to capture it.
+                    board[endLocation] = 'wQ'
+                    startColumn = startLocation[1]
+                    endColumn = endLocation[1]
+                    validEndCheck = blackPawnMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck and startColumn != endColumn:
+                        threatenedSpaces.append(endLocation)
+                    board[endLocation] = ' '
+    return threatenedSpaces
+
+def threatenedByWhite(board):
+    threatenedSpaces = []
+    
+    # First loop through all the potential threatening pieces. Only white pieces for this function.
+    for startLocation, threateningPiece in board.items():
+        global checkingForThreatened
+        checkingForThreatened = True
+        # For each threatening piece, starting with the white rook here:
+        if threateningPiece == 'wR':
+            # First find all empty spaces.
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = rookMovement(board, startLocation, endLocation)
+                    # Reset the checkingForThreatened variable to true after each validEndCheck
+                    checkingForThreatened = True
+                    # If the empty space is a valid movement location, add to threatened spaces.
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wB':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = bishopMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wN':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = knightMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wQ':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = queenMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        if threateningPiece == 'wK':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    validEndCheck = kingMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck:
+                        threatenedSpaces.append(endLocation)
+        # Need to make a special case for pawns, since pawns cannot capture pieces directly in front of them.
+        # Also, pawns can move diagonally only if a piece is present in that space!
+        if threateningPiece == 'wp':
+            for endLocation in board.keys():
+                if board[endLocation] == ' ':
+                    # Create a temporary "ghost" to check if the pawn can move diagonally to capture it.
+                    board[endLocation] = 'bQ'
+                    startColumn = startLocation[1]
+                    endColumn = endLocation[1]
+                    validEndCheck = whitePawnMovement(board, startLocation, endLocation)
+                    checkingForThreatened = True
+                    if validEndCheck and startColumn != endColumn:
+                        threatenedSpaces.append(endLocation)
+                    board[endLocation] = ' '
+    return threatenedSpaces
+
+def whiteKingCheck(board, whiteKingLocation):
+    '''Returns True if king at whiteKingLocation is in check.'''
+    # run check at the end of every turn to see if king is in check
+    # First, if current turn movement places your own king in check, then move is invalid
+    # Second, look to see if enemy king is in check
+    # If king is in check on current turn, only valid movement is movement that removes check
+    # If no movement possible, then checkmate
+
+    # King is in check if threatenedBy function lists the king's space as threatened
+
+    # Next, check to see if king is threatened.
+    # Need to be careful about king loops!
+    global checkingForThreatened
+    for startLocation, threateningPiece in board.items():
+        if threateningPiece == 'bR':
+            checkingForThreatened = True
+            validEndCheck = rookMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bB':
+            checkingForThreatened = True
+            validEndCheck = bishopMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bN':
+            checkingForThreatened = True
+            validEndCheck = knightMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bQ':
+            checkingForThreatened = True
+            validEndCheck = queenMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bK':
+            checkingForThreatened = True
+            validEndCheck = kingMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'bp':
+            checkingForThreatened = True
+            validEndCheck = blackPawnMovement(board, startLocation, whiteKingLocation)
+            if validEndCheck:
+                return True
+    return False
+
+def blackKingCheck(board, blackKingLocation):
+    '''Returns True if blackKingLocation would place the black king in check.'''
+    global checkingForThreatened
+    for startLocation, threateningPiece in board.items():
+        if threateningPiece == 'wR':
+            checkingForThreatened = True
+            validEndCheck = rookMovement(board, startLocation, blackKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'wB':
+            checkingForThreatened = True
+            validEndCheck = bishopMovement(board, startLocation, blackKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'wN':
+            checkingForThreatened = True
+            validEndCheck = knightMovement(board, startLocation, blackKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'wQ':
+            checkingForThreatened = True
+            validEndCheck = queenMovement(board, startLocation, blackKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'wK':
+            checkingForThreatened = True
+            validEndCheck = kingMovement(board, startLocation, blackKingLocation)
+            if validEndCheck:
+                return True
+        if threateningPiece == 'wp':
+            checkingForThreatened = True
+            validEndCheck = blackPawnMovement(board, startLocation, blackKingLocation)
+            if validEndCheck:
+                return True
+    return False
+
+def checkmate(board, kingLocation):
+    '''If a King is in check, this function checks for checkmate.'''
+    global globalWhiteKing
+    global whiteKingInCheck
+    global blackKingInCheck
+    global globalBlackKing
+    global checkingForThreatened
+    
+    checkmate = False
+    if whiteKingInCheck:
+        checkmate = True
+    if blackKingInCheck:
+        checkmate = True
+
+    while checkmate:
+        if whiteKingInCheck and current_turn == 'w':
+            for startLocation, piece in board.items():
+                if checkmate == False:
+                    break
+                if piece == 'wK':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = kingMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wK'
+                            globalWhiteKing = endLocation
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                                globalWhiteKing = startLocation
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wR':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = rookMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wR'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wB':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = bishopMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wB'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wN':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = knightMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wN'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wQ':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = queenMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wQ'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wp':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = whitePawnMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wp'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+
+        if blackKingInCheck and current_turn == 'b':
+            for startLocation, piece in board.items():
+                if checkmate == False:
+                    break
+                if piece == 'bK':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = kingMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bK'
+                            globalBlackKing = endLocation
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                                globalBlackKing = startLocation
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bR':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = rookMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bR'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bB':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = bishopMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bB'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bN':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = knightMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bN'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bQ':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = queenMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bQ'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bp':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = blackPawnMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bp'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+
+        if checkmate:
+            if current_turn == 'w':
+                print(Fore.CYAN + 'Checkmate! White Loses!' + Fore.RED + ' Congratulations Black!' + Fore.RESET)
+                return checkmate
+            if current_turn == 'b':
+                print(Fore.RED + 'Checkmate! Black Loses!' + Fore.CYAN + ' Congratulations White!' + Fore.RESET)
+                return checkmate
+        else:
+            return checkmate
+
 
 def whiteMove(board):
     '''This function asks what white piece to move to where. The function provides rules for valid movement.'''
+    current_turn = 'w'
     while True:
-        #Always print the board at the start of the loop, except when game is first started.
+        global whiteKingInCheck
         visualBoard(board)
+        if whiteKingInCheck:
+            print('White King is in check!')
+            if checkmate(board, globalWhiteKing):
+                raise Exception('Game Over!')
         startLocation = input(Fore.CYAN + 'White turn!' + Fore.RESET + ' Location of piece you would like to move? Enter row, then column.\n')
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
@@ -665,7 +1309,7 @@ def whiteMove(board):
             continue
         elif board[startLocation].startswith('w'):          #picked a valid start location containing a white piece.
             piece = board[startLocation]
-            endLocation = input('To what location would you like to move this piece?\n')  #after picking a valid start location, pick an end location confined by the movement rules
+            endLocation = input('To what location would you like to move this piece? (' + Fore.CYAN + board[startLocation] + Fore.RESET + ')\n')  #after picking a valid start location, pick an end location confined by the movement rules
             if endLocation.lower() == 'exit':
                 raise Exception('Exiting program!')
             if endLocation not in board.keys():
@@ -684,17 +1328,22 @@ def whiteMove(board):
             if board[startLocation] == 'wK':
                 validEndCheck = kingMovement(board, startLocation, endLocation)
             if not validEndCheck:
-                print('Invalid move!')
+                print(Fore.GREEN + 'Invalid move!' + Fore.RESET)
                 continue
             else:
                 movePiece(board, piece, startLocation, endLocation)
                 break
 
-
 def blackMove(board):
     '''This function asks what black piece to move to where. The function provides rules for valid movement.'''
+    current_turn = 'b'
     while True:
+        global blackKingInCheck
         visualBoard(board)
+        if blackKingInCheck:
+            print('Black King is in check!')
+            if checkmate(board, globalBlackKing):
+                raise Exception('Game Over!')
         startLocation = input(Fore.RED + 'Black turn! ' + Fore.RESET + 'Location of piece you would like to move? Enter row, then column.\n')
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
@@ -706,7 +1355,7 @@ def blackMove(board):
             continue
         elif board[startLocation].startswith('b'):          #picked a valid start location containing a white piece.
             piece = board[startLocation]
-            endLocation = input('To what location would you like to move this piece?\n')  #after picking a valid start location, pick an end location confined by the movement rules
+            endLocation = input('To what location would you like to move this piece? (' + Fore.RED + board[startLocation] + Fore.RESET + ')\n')  #after picking a valid start location, pick an end location confined by the movement rules
             if endLocation.lower() == 'exit':
                 raise Exception('Exiting program!')
             if endLocation not in board.keys():
@@ -725,7 +1374,7 @@ def blackMove(board):
             if board[startLocation] == 'bK':
                 validEndCheck = kingMovement(board, startLocation, endLocation)
             if not validEndCheck:
-                print('Invalid move!')
+                print(Fore.GREEN + 'Invalid move!' + Fore.RESET)
                 continue
             else:
                 movePiece(board, piece, startLocation, endLocation)
@@ -733,13 +1382,13 @@ def blackMove(board):
 
 # A test chessboard that can be set up for testing purposes.
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
-    '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': 'bp', '7e': 'bp', '7f': 'bp', '7g': 'bp', '7h': 'bp',
+    '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': 'bp', '7e': 'bp', '7f': 'wR', '7g': 'bp', '7h': 'bp',
     '6a': 'wp', '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ',
-    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wQ', '5e': ' ', '5f': ' ', '5g': 'wK', '5h': ' ',
+    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wK', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
     '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ', '4g': ' ', '4h': ' ',
     '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ',
     '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ',
-    '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': 'wK'}
+    '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': ' ', '1f': 'wN', '1g': 'wB', '1h': ' '}
 
 # Welcome Screen.
 print('\n\n' + Fore.GREEN + Back.BLACK + ('~' * 131) + Fore.RESET + Back.RESET)
@@ -748,32 +1397,83 @@ print('Type "exit" at any time to quit.')  # Exiting is inelegant, but works whe
 print('White player moves first. Piece locations are denoted by row, then column. E.g. the white King, "wK", is initially located at 1e.')
 print(Fore.GREEN + Back.BLACK + ('~' * 131) + Fore.RESET + Back.RESET)
 
-# Initialize the chessboard. Note that 'testboard' can instead be used for debugging.
+# Initialize the chessboard. Note that 'testBoard' can instead be used for debugging.
 # May want to implement saving, instead of initializing board always.
 chessInit(chessboard)
 
-# Main program loop.
+# Store the locations of the kings in a global variable. This variable is important for check and checkmate.
+# Can change chessboard to testBoard here, for testing purposes.
+# This is not a function, because it should only be executed once at the beginning of the game.
+# Then the global variables of KingLocation can be updated as needed by other functions.
+# Of course, this variable assumes only one king of each color is on the board (be wary when testing).
+for location in testBoard.keys():
+    if testBoard[location] == 'wK':
+        globalWhiteKing = location
+    if testBoard[location] == 'bK':
+        globalBlackKing = location
+
+
+
+
+# Main program loop. blackMove can be commented out for testing purposes.
+# testBoard can be used instead of chessboard for testing.
 while True:
     whiteMove(testBoard)
-    # blackMove(testBoard)
+    blackMove(testBoard)
 
 
+
+# Updated: 5/25/2020 7:50 pm
+
+
+#TODO:
+''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
+rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
+# Undo function?
+
+
+
+
+
+
+
+
+# UNUSED OR BROKEN CODE
+#______________________________________________________________________________________________________
 '''visualBoard(testBoard)
-##try:
+#try:
 blackMove(testBoard)
 #except Exception as exitMessage:
 #    print(exitMessage)  # The except clause will still result in the remaining code being executed.
 #try:
 whiteMove(testBoard)
 #except Exception as exitMessage:
- #   print(exitMessage)  # The except clause will still result in the remaining code being executed.
+#   print(exitMessage) # The except clause will still result in the remaining code being executed.
 
 visualBoard(testBoard)'''
 
 
-# Updated: 5/9/2020 4:30 pm
+'''# Store the previous movement in a global variable, for use by the undo function.
+undo =
+undoCheck = '''
+# def undoMove(board, piece, startLocation, endLocation)
 
-#TODO:
-''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
-rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
-# Undo function?
+
+# also black king in check bug?
+
+# The following function can be useful for setting variables at the beginning of other functions.
+# But it can create a whole lot of linter errors with unused variables. So using it is questionable.
+# Possible fix is to have all variables be global, and this function declare changes to the global variables.
+    # global startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex
+# Easier fix is to just not use this function, and set local variables as needed.
+'''def setStartEndIndices(startLocation, endLocation):'''
+'''Useful variables that give the start and end rows and columns, as well as a system for indexing the rows and columns.'''
+'''startRow = startLocation[0]
+    endRow = endLocation[0]
+    startColumn = startLocation[1]
+    endColumn = endLocation[1]
+    startRowIndex = rowString.find(startRow)
+    endRowIndex = rowString.find(endRow)                         #  row 8 is index 8, row 1 is index 1
+    startColumnIndex = columnString.find(startColumn)
+    endColumnIndex = columnString.find(endColumn)                    # column a is index 1, h is 8
+    return startRow, endRow, startColumn, endColumn, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex'''
