@@ -1056,15 +1056,248 @@ def blackKingCheck(board, blackKingLocation):
                 return True
     return False
 
-# def checkmate:
+def checkmate(board, kingLocation):
+    '''If a King is in check, this function checks for checkmate.'''
+    global globalWhiteKing
+    global whiteKingInCheck
+    global blackKingInCheck
+    global globalBlackKing
+    global checkingForThreatened
+    
+    checkmate = False
+    if whiteKingInCheck:
+        checkmate = True
+    if blackKingInCheck:
+        checkmate = True
+
+    while checkmate:
+        if whiteKingInCheck and current_turn == 'w':
+            for startLocation, piece in board.items():
+                if checkmate == False:
+                    break
+                if piece == 'wK':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = kingMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wK'
+                            globalWhiteKing = endLocation
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                                globalWhiteKing = startLocation
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wR':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = rookMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wR'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wB':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = bishopMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wB'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wN':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = knightMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wN'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wQ':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = queenMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wQ'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'wp':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = whitePawnMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'wp'
+                            checkingForThreatened = True
+                            if whiteKingCheck(board, globalWhiteKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+
+        if blackKingInCheck and current_turn == 'b':
+            for startLocation, piece in board.items():
+                if checkmate == False:
+                    break
+                if piece == 'bK':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = kingMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bK'
+                            globalBlackKing = endLocation
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                                globalBlackKing = startLocation
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bR':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = rookMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bR'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bB':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = bishopMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bB'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bN':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = knightMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bN'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bQ':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = queenMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bQ'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+                if piece == 'bp':
+                    for endLocation in board.keys():
+                        checkingForThreatened = True
+                        validEndCheck = blackPawnMovement(board, startLocation, endLocation)
+                        if validEndCheck:
+                            tempStart = board[startLocation]
+                            tempEnd = board[endLocation]
+                            board[startLocation] = ' '
+                            board[endLocation] = 'bp'
+                            checkingForThreatened = True
+                            if blackKingCheck(board, globalBlackKing):
+                                board[startLocation] = tempStart
+                                board[endLocation] = tempEnd
+                            else:
+                                checkmate = False
+                                break
+
+        if checkmate:
+            if current_turn == 'w':
+                print(Fore.CYAN + 'Checkmate! White Loses!' + Fore.RED + ' Congratulations Black!' + Fore.RESET)
+                return checkmate
+            if current_turn == 'b':
+                print(Fore.RED + 'Checkmate! Black Loses!' + Fore.CYAN + ' Congratulations White!' + Fore.RESET)
+                return checkmate
+        else:
+            return checkmate
+
 
 def whiteMove(board):
     '''This function asks what white piece to move to where. The function provides rules for valid movement.'''
     current_turn = 'w'
     while True:
+        global whiteKingInCheck
         visualBoard(board)
         if whiteKingInCheck:
             print('White King is in check!')
+            if checkmate(board, globalWhiteKing):
+                raise Exception('Game Over!')
         startLocation = input(Fore.CYAN + 'White turn!' + Fore.RESET + ' Location of piece you would like to move? Enter row, then column.\n')
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
@@ -1094,33 +1327,6 @@ def whiteMove(board):
                 validEndCheck = queenMovement(board, startLocation, endLocation)
             if board[startLocation] == 'wK':
                 validEndCheck = kingMovement(board, startLocation, endLocation)
-            # If the king is currently in check:
-            # Unnecessary! Individual movement functions already check for check! 
-            # Need to repurpose this for checkmate
-            global whiteKingInCheck
-            global globalWhiteKing
-            if whiteKingInCheck:
-                # Then temporarily move the pieces.
-                tempStart = board[startLocation]
-                tempEnd = board[endLocation]
-                if tempStart == 'wK':
-                    globalWhiteKing = endLocation
-                board[startLocation] = ' '
-                board[endLocation] = tempStart
-                # Invalid if king is still in check. Move pieces back to original locations.
-                if whiteKingCheck(board, globalWhiteKing):
-                    print('Invalid move! King is still in check.')
-                    board[endLocation] = tempEnd
-                    board[startLocation] = tempStart
-                    if tempStart == 'wK':
-                        globalWhiteKing = startLocation
-                    validEndCheck = False
-                else:
-                    board[endLocation] = tempEnd
-                    board[startLocation] = tempStart
-                    if tempStart == 'wK':
-                        globalWhiteKing = startLocation
-                    whiteKingInCheck = False
             if not validEndCheck:
                 print(Fore.GREEN + 'Invalid move!' + Fore.RESET)
                 continue
@@ -1132,9 +1338,12 @@ def blackMove(board):
     '''This function asks what black piece to move to where. The function provides rules for valid movement.'''
     current_turn = 'b'
     while True:
+        global blackKingInCheck
         visualBoard(board)
         if blackKingInCheck:
             print('Black King is in check!')
+            if checkmate(board, globalBlackKing):
+                raise Exception('Game Over!')
         startLocation = input(Fore.RED + 'Black turn! ' + Fore.RESET + 'Location of piece you would like to move? Enter row, then column.\n')
         if startLocation.lower() == 'exit':
             raise Exception('Exiting program!') # Need to handle exiting better.
@@ -1164,31 +1373,6 @@ def blackMove(board):
                 validEndCheck = queenMovement(board, startLocation, endLocation)
             if board[startLocation] == 'bK':
                 validEndCheck = kingMovement(board, startLocation, endLocation)
-            # If the king is currently in check:
-            global blackKingInCheck
-            global globalBlackKing
-            if blackKingInCheck:
-                # Then temporarily move the pieces. Need to temporarily update king location if king is moved.
-                tempStart = board[startLocation]
-                tempEnd = board[endLocation]
-                if tempStart == 'bK':
-                    globalBlackKing = endLocation
-                board[startLocation] = ' '
-                board[endLocation] = tempStart
-                # Invalid if king is still in check. Move pieces back to original locations.
-                if blackKingCheck(board, globalBlackKing):
-                    print('Invalid move! King is still in check.')
-                    board[endLocation] = tempEnd
-                    board[startLocation] = tempStart
-                    if tempStart == 'bK':
-                        globalBlackKing = startLocation
-                    validEndCheck = False
-                else:
-                    board[endLocation] = tempEnd
-                    board[startLocation] = tempStart
-                    if tempStart == 'bK':
-                        globalBlackKing = startLocation
-                    blackKingInCheck = False
             if not validEndCheck:
                 print(Fore.GREEN + 'Invalid move!' + Fore.RESET)
                 continue
@@ -1239,7 +1423,7 @@ while True:
 
 
 
-# Updated: 5/21/2020 12 pm
+# Updated: 5/25/2020 7:50 pm
 
 
 #TODO:
