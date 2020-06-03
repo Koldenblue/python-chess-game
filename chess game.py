@@ -1382,9 +1382,9 @@ def blackMove(board):
 
 # A test chessboard that can be set up for testing purposes.
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
-    '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': 'bp', '7e': 'bp', '7f': 'wR', '7g': 'bp', '7h': 'bp',
+    '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': ' ', '7e': 'bp', '7f': 'wR', '7g': 'bp', '7h': 'bp',
     '6a': 'wp', '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ',
-    '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'wK', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
+    '5a': ' ', '5b': 'wK', '5c': ' ', '5d': ' ', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
     '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ', '4g': ' ', '4h': ' ',
     '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ',
     '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ',
@@ -1423,15 +1423,15 @@ while True:
 
 
 
-# Updated: 5/25/2020 7:50 pm
+# Updated: 5/28/2020 6:20 pm
 
 
 #TODO:
-''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for check and checkmate, rules for switching a bishop with a pawn,
+''' Rules for castling, for when a pawn reaches the opposite end of the board, rules for switching a bishop with a pawn,
 rules for turn structure and winning, quitting out of the game, starting a new game, possibly AI movement'''
 # Undo function?
 
-
+# BUG: move queen down one space. Move king down one space. Checkmate results!
 
 
 
@@ -1458,8 +1458,6 @@ undo =
 undoCheck = '''
 # def undoMove(board, piece, startLocation, endLocation)
 
-
-# also black king in check bug?
 
 # The following function can be useful for setting variables at the beginning of other functions.
 # But it can create a whole lot of linter errors with unused variables. So using it is questionable.
