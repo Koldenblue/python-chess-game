@@ -1,6 +1,7 @@
 class Position:
     def __init__(self, x, y):
-        '''Defines a coordinate on the chessboard, where the x axis changes with columns, and the y axis changes with rows.'''
+        '''Defines a coordinate on the chessboard, where the x axis changes with columns, 
+        and the y axis changes with rows.'''
         self.column = x 
         self.row = y
     
@@ -10,7 +11,10 @@ class Position:
     def isPosition(self, pt2):
         return (self.column == pt2.column) and (self.row == pt2.row)
 
-
+    def move_posn(self, end_posn, valid_end_check):
+        if valid_end_check == False:
+            print("Invalid move!")
+        
 
 
 '''Tests demonstrating deep equality between position objects:'''
