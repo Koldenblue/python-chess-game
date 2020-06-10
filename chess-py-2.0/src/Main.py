@@ -15,3 +15,5 @@ print(bR1.rook_move(Position(1,0)))
 print(bR1.piece.position.column)
 
 chessboard.visual_board()
+
+print(wR1.piece.position.column)
