@@ -9,9 +9,10 @@ class Piece:
         self.identity = identity
         self.Position = Position
 
-    def rook_move(self, end_posn):
+    def check_move(self, end_posn):
         '''Determines if rook movement from a start location to an end location is valid.
             end_posn is a position object corresponding to the target movement location for the rook.'''
+        # if self.identity == rook:
         start_column = self.Position.column
         start_row = self.Position.row
         valid_end_check = False
