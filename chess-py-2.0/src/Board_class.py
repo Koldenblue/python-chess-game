@@ -6,6 +6,8 @@ from Piece_class import Piece
 class Board:
     columns = tuple('abcdefgh')
     rows = tuple('12345678')
+    MAX_ROW = 7;
+    MAX_COLUMN = 7;
 
     def __init__(self, space_list = [], space_dict = {}, space_array = []):
         '''Creates a board object consisting of 64 named spaces, a1 thru h8, 
