@@ -1,3 +1,6 @@
+from Piece_class import Piece
+from Rook_class import Rook
+
 class Position:
     def __init__(self, x, y):
         '''Defines a coordinate on the chessboard, where the x axis changes with columns, 
@@ -8,13 +11,12 @@ class Position:
     def __str__(self):
         return "({0}, {1})".format(self.column, self.row)
 
-    def isPosition(self, pt2):
+    def is_position(self, pt2):
         return (self.column == pt2.column) and (self.row == pt2.row)
 
     def move_posn(self, end_posn, valid_end_check):
         if valid_end_check == False:
             print("Invalid move!")
-        
 
 
 '''Tests demonstrating deep equality between position objects:'''

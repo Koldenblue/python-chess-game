@@ -6,20 +6,18 @@ from Board_class import Board
 
 
 chessboard = Board()
-chessboard.board_init()
+bR1, bR2, wR1, wR2 = chessboard.board_init()
+print("\n")
 print(chessboard.space_list)
 print("\n", chessboard.space_dict, "\n")
 print(chessboard.space_dict['a2'])
+print("\n")
+print(chessboard.piece_dict)
+print("\n")
+print(chessboard.space_array)
+print("\n")
+
 
 chessboard.space_points_ref()
 
-print(chessboard.space_array)
-
-
-bR1, bR2, wR1, wR2 = chessboard.board_init()
-
-
-print(bR1.rook_move(Position(1, 0)))
-print(bR1.black)
-
-#chessboard.visual_board()
+chessboard.visual_board()
