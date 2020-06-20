@@ -1,14 +1,14 @@
 from Rook_class import Rook
-from Position_class import Position
+from NullPiece_class import NullPiece
 
 class Piece:
-    def __init__(self, black, identity, Position):
-        ''' black is a bool. identity is the name of the piece. 
+    def __init__(self, black, identity, position):
+        ''' black is a bool. identity can be the class of the piece. 
         position is a Position(column, row) object.'''
         self.black = black
         self.identity = identity
-        self.Position = Position
-
+        self.position = position
+        
     def check_move(self, end_posn):
         '''Determines if rook movement from a start location to an end location is valid.
             end_posn is a position object corresponding to the target movement location for the rook.'''
