@@ -4,6 +4,7 @@ from Piece_class import Piece
 from NullPiece_class import NullPiece
 
 class Board:
+    '''Board keeps track of spaces, and the pieces on those spaces.'''
     columns = tuple('abcdefgh')
     rows = tuple('12345678')
     MAX_ROW = 7
@@ -29,11 +30,11 @@ class Board:
         for space in space_list:
             space_dict[space] = Position(x, y)
             x += 1
-            if x > 7:
+            if x > self.MAX_COLUMN:
                 x = 0
                 y += 1
 
-        # Create space_array. space_array is a 2d array of max size space_array[7][7].
+        # Create space_array. space_array is a 2d array of length [8][8].
         # The array indices correspond to the 64 board spaces. 
         # Outer array (first array) is columns. Inner array is rows.
         for column in range(8):
@@ -42,28 +43,63 @@ class Board:
                 row_list.append(None)
             space_array.append(row_list)
 
+
+        # A dictionary of spaces a1 thru h8, which contain pieces.
+        # Unnecessary at this point.
         for space in space_list:
             piece_dict[space] = NullPiece()
 
+
     def board_init(self):
-        # Overlap: the piece object has a position, but the board also keeps track of pieces in an array?
-        bR1 = Piece(True, Rook(), Position(0, 7))
+        # Reset space_array to None:
+        for column in range(8):
+            for row in range(8):
+                self.space_array[column][row] = None
+
+        # Initialize piece locations. Piece_dict is not currently used.
+        bR1 = Piece(True, Rook())
         self.space_array[0][7] = bR1
         self.piece_dict['a8'] = bR1
 
-        bR2 = Piece(True, Rook(), Position(7, 7))
+        bR2 = Piece(True, Rook())
         self.space_array[7][7] = bR2
         self.piece_dict['h8'] = bR2
 
-        wR1 = Piece(False, Rook(), Position(0, 0))
+        wR1 = Piece(False, Rook())
         self.space_array[0][0] = wR1
         self.piece_dict['a1'] = wR1
 
-        wR2 = Piece(False, Rook(), Position(7, 0))
+        wR2 = Piece(False, Rook())
         self.space_array[7][0] = wR2
         self.piece_dict['h1'] = wR2
-        
+
         return bR1, bR2, wR1, wR2
+
+    def move(self, start_posn, end_posn):
+        # Input position will be in format 'a1' etc.
+        start_posn = start_posn.lower()
+        end_posn = end_posn.lower()
+        # Use space_dict to translate format to column 0-7 and row 0-7
+        start_column = self.space_dict[start_posn].column
+        start_row = self.space_dict[start_posn].row
+        end_column = self.space_dict[end_posn].column
+        end_row = self.space_dict[end_posn].row
+
+        # Get the piece object at the start location
+        starting_piece = self.space_array[start_column][start_row]
+        if starting_piece == None:
+            return None  # Placeholder for if there is no piece at the start location
+        # Run the check move function, which depends on the identity of the piece.
+        valid_end_check = starting_piece.check_move(start_column, start_row, end_column, end_row, self.space_array) 
+
+        # If movement is valid, move the piece.
+        # TODO: print out when piece has been captured.
+        if valid_end_check:
+            self.space_array[start_column][start_row] = None
+            self.space_array[end_column][end_row] = starting_piece
+            return True
+        else:
+            return False
 
 
     def visual_board(self):
@@ -121,4 +157,5 @@ class Board:
             if print_counter > 7:
                 print("\n")
                 print_counter = 0
+
 

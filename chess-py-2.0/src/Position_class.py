@@ -14,10 +14,6 @@ class Position:
     def is_position(self, pt2):
         return (self.column == pt2.column) and (self.row == pt2.row)
 
-    def move_posn(self, end_posn, valid_end_check):
-        if valid_end_check == False:
-            print("Invalid move!")
-
 
 '''Tests demonstrating deep equality between position objects:'''
 #def isPosn(pt1, pt2):
