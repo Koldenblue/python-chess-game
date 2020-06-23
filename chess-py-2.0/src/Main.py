@@ -13,8 +13,11 @@ def main():
     chessboard.visual_board()
     black_turn = False
 
-    # FOR TESTING:
-    chessboard.move('a1', 'a2')
+    # TEST CODE:
+    # chessboard.move('a1', 'a2')
+    print(chessboard.space_array)
+    chessboard.space_points_ref()
+    # END TEST CODE
 
 
     # Game loop:
@@ -47,7 +50,10 @@ def main():
 main()
 
 
-# FOR TESTING:
+
+
+
+# TEST CODE:
 chessboard = Board()
 bR1, bR2, wR1, wR2 = chessboard.board_init()
 chessboard.visual_board()
@@ -58,8 +64,7 @@ print(chessboard.space_dict['a2'])
 # print("\n")
 # print(chessboard.piece_dict)
 # print("\n")
-print(chessboard.space_array)
 # print("\n")
-chessboard.space_points_ref()
+# END TEST CODE
 
 
