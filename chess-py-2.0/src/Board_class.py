@@ -89,8 +89,12 @@ class Board:
             return False
 
     def eval_check(self):
+        print("*" * 100)
         board_copy = self.space_array
-        print(self.space_array.index(self.bK))
+        for column in board_copy:
+            if self.bK in column:
+                print(print(column))
+
 
     def visual_board(self):
         '''Prints out a graphic representation of a chessboard.'''
