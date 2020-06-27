@@ -2,6 +2,9 @@ from Position_class import Position
 from Rook_class import Rook
 from Piece_class import Piece
 from NullPiece_class import NullPiece
+from King_class import King
+from Pawn_class import Pawn
+import copy
 
 class Board:
     '''Board keeps track of spaces, and the pieces on those spaces.'''
@@ -45,28 +48,37 @@ class Board:
             space_array.append(row_list)
 
 
-    def move(self, start_posn, end_posn):
-        '''A function that gets the start and end rows and columns, then gets the piece at the start location. 
-        It then calls the appropriate move function to check if movement is valid.
-        Finally, if movement is valid, it moves the piece.'''
+    def get_indices(self, posn):
+        '''Takes input positions in the format "a1" thru "h8".
+        Returns indices for the column and row, which correspond to board_array indices.'''
         # Input position will be in format 'a1' etc.
-        start_posn = start_posn.lower()
-        end_posn = end_posn.lower()
-        # Use space_dict to translate format to column 0-7 and row 0-7, since space_dict contains Position(x, y) objects
-        start_column = self.space_dict[start_posn].column
-        start_row = self.space_dict[start_posn].row
-        end_column = self.space_dict[end_posn].column
-        end_row = self.space_dict[end_posn].row
+        posn = posn.lower()
+
+        # Use space_dict to translate format to column 0-7 and row 0-7, 
+        # since space_dict contains Position(x, y) objects.
+        column = self.space_dict[posn].column
+        row = self.space_dict[posn].row
+        return column, row
+
+
+    def move(self, start_posn, end_posn):
+        '''A function that gets the piece at the start location. 
+        It then calls the move function to check if movement is valid.
+        Finally, if movement is valid, it moves the piece.'''
+
+        start_column, start_row = self.get_indices(start_posn)
+        end_column, end_row = self.get_indices(end_posn)
 
         # Get the piece object at the start location
         starting_piece = self.space_array[start_column][start_row]
         if starting_piece == NullPiece():
             return False
         # Run the check move function, which depends on the identity of the piece.
-        valid_end_check = starting_piece.check_move(start_column, start_row, end_column, end_row, self.space_array) 
+        valid_end_check = starting_piece.validate_move(start_column, start_row, end_column, end_row, self.space_array)
 
         # If movement is valid, move the piece.
         # TODO: print out when piece has been captured.
+        # TODO: Separate movement and validity checking into two functions?
         if valid_end_check:
             self.space_array[start_column][start_row] = NullPiece()
             self.space_array[end_column][end_row] = starting_piece
@@ -76,6 +88,9 @@ class Board:
             self.visual_board()
             return False
 
+    def eval_check(self):
+        board_copy = self.space_array
+        print(self.space_array.index(self.bK))
 
     def visual_board(self):
         '''Prints out a graphic representation of a chessboard.'''
@@ -88,7 +103,7 @@ class Board:
 
         # Print out line at top.
         print("\n" + "  _" + "_" * (8 * 8))
-        print("  " + "|       " * 8 + "|")     # Enable this line to add one more empty space line at the top
+        # print("  " + "|       " * 8 + "|")     # Enable this line to add one more empty space line at the top
 
         # Print out row number. self.rows is printed out starting from the end, hence rows[-(i+1)]
         for i in range(self.BOARD_SIZE):
@@ -128,23 +143,27 @@ class Board:
                 self.space_array[column][row] = None
 
         # Initialize piece locations.
-        bR1 = Rook(True)
-        self.space_array[0][7] = bR1
+        self.space_array[0][7] = Rook(True)     # a8
+        self.space_array[7][7] = Rook(True)     # h8
+        self.space_array[0][0] = Rook(False)    # a1
+        self.space_array[7][0] = Rook(False)    # h1
+        self.bK = copy.deepcopy(King(True))
+        self.space_array[4][7] = self.bK     # e8
+        self.space_array[4][0] = King(False)    # e1
+        # black pawns, a7 through h7:
+        for i in range(self.BOARD_SIZE):
+            self.space_array[i][6] = Pawn(True)
+        # white pawns, a2 through h2:
+        for j in range(self.BOARD_SIZE):
+            self.space_array[j][1] = Pawn(False)
 
-        bR2 = Rook(True)
-        self.space_array[7][7] = bR2
-
-        wR1 = Rook(False)
-        self.space_array[0][0] = wR1
-
-        wR2 = Rook(False)
-        self.space_array[7][0] = wR2
+        #TODO: Initialize other pieces.
 
         for i in range(len(self.space_array)):
             for j in range(len(self.space_array[i])):
                 if self.space_array[i][j] == None:
                     self.space_array[i][j] = NullPiece()
-        return bR1, bR2, wR1, wR2
+
 
 
     def space_points_ref(self):
