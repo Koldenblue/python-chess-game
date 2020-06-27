@@ -9,17 +9,24 @@ import sys
 
 def main():
     chessboard = Board()
-    bR1, bR2, wR1, wR2 = chessboard.board_init()
+    chessboard.board_init()
     chessboard.visual_board()
     black_turn = False
 
-    # FOR TESTING:
-    chessboard.move('a1', 'a2')
+    # TEST CODE:
+    # chessboard.move('a1', 'a2')
+    print(chessboard.space_array)
+    chessboard.eval_check()
+    chessboard.space_points_ref()
+
+
+    # END TEST CODE
 
 
     # Game loop:
     while True:
         # Get input for movement:
+        #TODO: add black or white turns
         start_posn = input("start location?")
         if start_posn.lower() in chessboard.space_list:
             pass
@@ -47,9 +54,23 @@ def main():
 main()
 
 
-# FOR TESTING:
+
+
+
+# TEST CODE:
+for column, piece_list in enumerate(chessboard.space_array):
+    for row in range(len(piece_list)):
+        print(chessboard.space_array[column][row].black)
+for column, row in enumerate(chessboard.space_array):
+    print("index = " + str(column))
+    print("value = " + str(row))
+
+print("\n\n")
+for column in chessboard.space_array:
+    for piece in column:
+        print(piece)
 chessboard = Board()
-bR1, bR2, wR1, wR2 = chessboard.board_init()
+chessboard.board_init()
 chessboard.visual_board()
 # print("\n")
 # print(chessboard.space_list)
@@ -58,8 +79,7 @@ print(chessboard.space_dict['a2'])
 # print("\n")
 # print(chessboard.piece_dict)
 # print("\n")
-print(chessboard.space_array)
 # print("\n")
-chessboard.space_points_ref()
+# END TEST CODE
 
 
