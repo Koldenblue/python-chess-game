@@ -14,7 +14,7 @@ class King (Piece):
 
 
     def eval_check(self, king_column, king_row, board_array):
-        '''Evaluates whether or not a king is in check. Should be called after any movement.'''
+        '''Evaluates whether or not a king is in check. Returns True if king is placed in check. Should be called after any movement.'''
         # Code for a black King. Color is checked at top of function so that it only has to be checked once.
         checks_king = False
         if self.black:

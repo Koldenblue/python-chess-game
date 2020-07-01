@@ -49,56 +49,75 @@ class Board:
 
 
     def get_indices(self, posn):
-        '''Takes input positions in the format "a1" thru "h8".
+        '''Takes input positions, where 'posn' is in the format "a1" thru "h8".
         Returns indices for the column and row, which correspond to board_array indices.'''
-        # Input position will be in format 'a1' etc.
-        posn = posn.lower()
-
-        # Use space_dict to translate format to column 0-7 and row 0-7, 
+        # Use space_dict to translate from 'a1-h8' format to column 0-7 and row 0-7, 
         # since space_dict contains Position(x, y) objects.
         column = self.space_dict[posn].column
         row = self.space_dict[posn].row
         return column, row
 
 
-    def move(self, start_posn, end_posn):
-        '''A function that gets the piece at the start location. 
-        It then calls the move function to check if movement is valid.
-        Finally, if movement is valid, it moves the piece.'''
-
-        start_column, start_row = self.get_indices(start_posn)
-        end_column, end_row = self.get_indices(end_posn)
-
+    def validate_move(self, start_column, start_row, end_column, end_row):
+        '''A function that gets the piece at the start location.
+        It then calls the move function to check if movement is valid.'''
         # Get the piece object at the start location
         starting_piece = self.space_array[start_column][start_row]
         if starting_piece == NullPiece():
             return False
         # Run the check move function, which depends on the identity of the piece.
         valid_end_check = starting_piece.validate_move(start_column, start_row, end_column, end_row, self.space_array)
+        return valid_end_check
 
-        # If movement is valid, move the piece.
-        # TODO: print out when piece has been captured.
-        # TODO: Separate movement and validity checking into two functions?
-        if valid_end_check:
-            self.space_array[start_column][start_row] = NullPiece()
-            self.space_array[end_column][end_row] = starting_piece
-            self.visual_board()
-            return True
-        else:
-            self.visual_board()
-            return False
+    def eval_check(self, start_column, start_row, end_column, end_row):
+        # First make the movement on a copy of the board.
+        board_copy = self.move_mirror(start_column, start_row, end_column, end_row)
+        found_bK = False
+        found_wK = False
+        bK = King(True)
+        wK = King(False)
+        # Next search the board copy for the king locations.
+        for column in range(len(board_copy)):
+            for piece_obj in board_copy[column]:
+                if piece_obj.symbol == 'bK':
+                    column = column_list.index(piece_obj)
+                    row = piece_obj.index()
+                    # Once the kings have been found, evaluate whether they are placed in check.
+                    if bK.eval_check(column, row, board_copy):
+                        bK.in_check = True
+                    found_bK = True
+                elif piece_obj.symbol == 'wK':
+                    column = column_list.index()
+                    row = piece_obj.index()
+                    if wK.eval_check(column, row, board_copy):
+                        wK.in_check = True
+                    found_wK = True
+            if found_bK and found_wK:
+                break
+        return bK, wK
 
-    def eval_check(self):
-        print("*" * 100)
-        board_copy = self.space_array
-        for column in board_copy:
-            if self.bK in column:
-                print(print(column))
+    def move(self, start_column, start_row, end_column, end_row):
+        '''Moves a piece on the board. Prints when pieces have been captured.
+        Prints out the new board state.'''
+        starting_piece = self.space_array[start_column][start_row]
+        self.space_array[start_column][start_row] = NullPiece()
+        if self.space_array[end_column][end_row].black != None:
+            print("{0} has been captured!".format(self.space_array[end_column][end_row].symbol))
+        self.space_array[end_column][end_row] = starting_piece
 
+
+
+    def move_mirror(self, start_column, start_row, end_column, end_row):
+        '''Moves a piece on a copy of the board array.'''
+        # Add [:] to make a copy, rather than simply referencing the same array!
+        board_copy = self.space_array[:]
+        starting_piece = board_copy[start_column][start_row]
+        board_copy[start_column][start_row] = NullPiece()
+        board_copy[end_column][end_row] = starting_piece
+        return board_copy
 
     def visual_board(self):
         '''Prints out a graphic representation of a chessboard.'''
-
         #Print out column letters:
         print("\n")
         print("   ", end="")
@@ -151,8 +170,7 @@ class Board:
         self.space_array[7][7] = Rook(True)     # h8
         self.space_array[0][0] = Rook(False)    # a1
         self.space_array[7][0] = Rook(False)    # h1
-        self.bK = copy.deepcopy(King(True))
-        self.space_array[4][7] = self.bK     # e8
+        self.space_array[4][7] = King(True)     # e8
         self.space_array[4][0] = King(False)    # e1
         # black pawns, a7 through h7:
         for i in range(self.BOARD_SIZE):
@@ -163,11 +181,11 @@ class Board:
 
         #TODO: Initialize other pieces.
 
+        # Finally, set empty spaces to contain NullPiece()s
         for i in range(len(self.space_array)):
             for j in range(len(self.space_array[i])):
                 if self.space_array[i][j] == None:
                     self.space_array[i][j] = NullPiece()
-
 
 
     def space_points_ref(self):
