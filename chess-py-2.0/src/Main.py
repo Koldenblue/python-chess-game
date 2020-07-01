@@ -41,8 +41,11 @@ def main():
             print("Invalid movement!")
             continue
 
+
+
         # Find if any kings are placed in check.
         wK, bK = chessboard.eval_check(start_column, start_row, end_column, end_row)
+
         if black_turn and bK.in_check:
             print(f"Invalid move! Friendly {turn} king would be placed in check.")
             continue
@@ -103,20 +106,15 @@ main()
 # END TEST CODE
 
 # TEST CODE:
-for column, piece_list in enumerate(chessboard.space_array):
-    for row in range(len(piece_list)):
-        print(chessboard.space_array[column][row].black)
-for column, row in enumerate(chessboard.space_array):
-    print("index = " + str(column))
-    print("value = " + str(row))
 
 print("\n\n")
-for column in chessboard.space_array:
-    for piece in column:
-        print(piece)
+
 chessboard = Board()
 chessboard.board_init()
 chessboard.visual_board()
+for column in chessboard.space_array:
+    for piece in column:
+        print(piece)
 # print("\n")
 # print(chessboard.space_list)
 # print("\n", chessboard.space_dict, "\n")

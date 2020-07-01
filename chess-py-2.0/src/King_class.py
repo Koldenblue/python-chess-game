@@ -48,8 +48,4 @@ class King (Piece):
 
     def validate_move(self, start_column, start_row, end_column, end_row, board_array):
         valid_end_check = False
-        checks_king = self.eval_check(end_column, end_row, board_array)
-        if checks_king:
-            return valid_end_check
-
         return valid_end_check

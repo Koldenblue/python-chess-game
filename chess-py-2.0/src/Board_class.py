@@ -77,18 +77,14 @@ class Board:
         bK = King(True)
         wK = King(False)
         # Next search the board copy for the king locations.
-        for column in range(len(board_copy)):
-            for piece_obj in board_copy[column]:
-                if piece_obj.symbol == 'bK':
-                    column = column_list.index(piece_obj)
-                    row = piece_obj.index()
+        for column, column_list in enumerate(board_copy):
+            for row in range(len(column_list)):
+                if board_copy[column][row].symbol == 'bK':
                     # Once the kings have been found, evaluate whether they are placed in check.
                     if bK.eval_check(column, row, board_copy):
                         bK.in_check = True
                     found_bK = True
-                elif piece_obj.symbol == 'wK':
-                    column = column_list.index()
-                    row = piece_obj.index()
+                elif board_copy[column][row].symbol == 'wK':
                     if wK.eval_check(column, row, board_copy):
                         wK.in_check = True
                     found_wK = True
@@ -110,7 +106,7 @@ class Board:
     def move_mirror(self, start_column, start_row, end_column, end_row):
         '''Moves a piece on a copy of the board array.'''
         # Add [:] to make a copy, rather than simply referencing the same array!
-        board_copy = self.space_array[:]
+        board_copy = copy.deepcopy(self.space_array)
         starting_piece = board_copy[start_column][start_row]
         board_copy[start_column][start_row] = NullPiece()
         board_copy[end_column][end_row] = starting_piece
