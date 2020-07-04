@@ -7,7 +7,7 @@ class Pawn (Piece):
             self.symbol = 'bp'
         else:
             self.symbol = 'wp'
-    
+
     def validate_move(self, start_column, start_row, end_column, end_row, board_array):
         '''Returns true if movement of a pawn is valid.'''
         # Note that the given arguments for columns and rows are indices 0-7,
@@ -18,6 +18,7 @@ class Pawn (Piece):
         if abs(start_column - end_column) > 1:
             return valid_end_check
 
+        # black pawn movement:
         if self.black:
             # black pawn can only move downwards (row must decrease)
             if end_row >= start_row:
@@ -30,11 +31,11 @@ class Pawn (Piece):
                             valid_end_check = True
                             return valid_end_check
                     if end_row == 4:
-                        if board_array[end_column][end_row].black == None and board_array[end_column][end_row + 1] == None:
+                        if board_array[end_column][end_row].black == None and board_array[end_column][end_row + 1].black == None:
                             valid_end_check = True
                             return valid_end_check
                     return valid_end_check
-                # If pawn has already moved, it can only move one space forward, and only if that space is empty.
+                # If pawn moved earlier in the game, it can only move one space forward, and only if that space is empty.
                 if start_row < 6:
                     if end_row != start_row - 1:
                         return valid_end_check
@@ -53,13 +54,11 @@ class Pawn (Piece):
                 else:
                     return valid_end_check
 
-
-        #TODO: white pawn
-        if not self.black:
+        # white pawn movement:
+        if self.black == False:
             # white pawn can only move upwards (row must increase)
             if end_row <= start_row:
                 return valid_end_check
-
             # If white pawn is in starting row 1, it can move forward two spaces if those spaces are empty.
             if start_column == end_column:
                 if start_row == 1:
@@ -68,11 +67,11 @@ class Pawn (Piece):
                             valid_end_check = True
                             return valid_end_check
                     if end_row == 3:
-                        if board_array[end_column][end_row].black == None and board_array[end_column][end_row + 1] == None:
+                        if board_array[end_column][end_row].black == None and board_array[end_column][end_row + 1].black == None:
                             valid_end_check = True
                             return valid_end_check
                     return valid_end_check
-                # If pawn has already moved, it can only move one space forward, and only if that space is empty.
+                # If pawn moved earlier in the game, it can only move one space forward, and only if that space is empty.
                 if start_row > 1:
                     if end_row != start_row + 1:
                         return valid_end_check
@@ -81,7 +80,7 @@ class Pawn (Piece):
                     else:
                         valid_end_check = True
                         return valid_end_check
-            # white pawns can move diagonally, but only to capture black pieces.
+            # white pawns can move diagonally forward, but only to capture black pieces.
             if abs(start_column - end_column) == 1:
                 if end_row != start_row + 1:
                     return valid_end_check

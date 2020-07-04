@@ -40,12 +40,25 @@ class King (Piece):
             return checks_king
 
 
-    def eval_checkmate(self, board_array):
-        '''If a king is in check, this function should be called, and will return true if checkmate.'''
-        #TODO
+    def eval_checkmate(self, board_array, black_turn):
+        '''If a king is in check, this function should be called, and will return true if checkmate.
+        baord_array is the current board state. black_turn is a boolean.'''
+        for column, column_list in enumerate(board_array):
+            for row in range(len(column_list)):
+                # If the piece belongs to the current player:
+                # psuedocode: First check to see if the king can move.
+                # Use the above eval_check function to see if the king is still in check.
+                # Next loop through same color pieces and get possible movements.
+                # Maybe create a new piece function to get an array of all possible movement locations?
+                # Finally, loop through the possible movement locations and see if any cause eval_check to return false.
+                # If not, checkmate.
+                if board_array[column][row].black == black_turn:
+                    can_move = board_array[column][row].validate_move()
+                    still_checked = eval_check()
         return False
 
 
     def validate_move(self, start_column, start_row, end_column, end_row, board_array):
+        #TODO
         valid_end_check = False
         return valid_end_check
