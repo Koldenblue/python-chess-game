@@ -6,22 +6,17 @@ class Position:
         self.row = y
     
     def __str__(self):
+        '''Allows the print command to be used to print out a Position in the format "(x, y)".'''
         return "({0}, {1})".format(self.column, self.row)
 
-    def is_position(self, pt2):
+    def __eq__(self, pt2):
+        '''Overloads the equality operator so that two Position objects are equal if they 
+        have the same x and y coordinates. Otherwise, they would be considered two different objects.'''
         return (self.column == pt2.column) and (self.row == pt2.row)
 
-    # def __eq__(self)
-
-
-'''Tests demonstrating deep equality between position objects:'''
-#def isPosn(pt1, pt2):
-#    return (pt1.column == pt2.column) and (pt1.row == pt2.row)
-
-#pt1 = Position(1, 1)
-#pt2 = Position(1, 1)
-#print(pt1 == pt2)      # Returns False
-#print(pt1 is pt2)      # returns False
-#print(pt1.isPosition(pt2))     # returns True
-#print(isPosn(pt1, pt2))     #returns True
-
+'''Sample tests demonstrating deep equality between position objects:'''
+'''
+pt1 = Position(1, 1)
+pt2 = Position(1, 1)
+print(pt1 == pt2)      # Returns True
+'''
