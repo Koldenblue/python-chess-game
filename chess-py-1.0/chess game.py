@@ -60,6 +60,38 @@ def visualBoard(playstate):
             print('|', end = '')
     print('\n' + chr(175) + (chr(175) * ((6*8)+8)))         #Print the line on the bottom of the board.
 
+def demoPrinter(playstate): #rename to visualBoard for screenshots. switches rows and columns for proper notation.
+    '''Prints a graphic version of all the pieces on the chessboard.'''
+    print('\n')
+    columns = ('87654321')
+    for column in columns:
+        print(column.center(7), end = '')       # First print the column letters.
+    print('\n' + '_' + '_' * ((6*8)+8))         # Next print the line on top of the board.
+    print('|', end = '')
+    space = 0
+    rowNum = 8
+    rows = ('0abcdefgh')
+
+    for v in playstate.values():                # Next print the board, using the pieces listed in the chessboard dictionary.
+        if v.startswith('w'):
+            print(Fore.CYAN + v.center(6) + Fore.WHITE + '|', end = '')
+            space += 1
+        elif v.startswith('b'):
+            print(Fore.RED + v.center(6) + Fore.WHITE + '|', end = '' )
+            space += 1
+        else:                                   # For all spaces, print a colored red or cyan piece or an empty space.
+            print(v.center(6) + '|', end = '')
+            space += 1
+        if space == 64:                         # There are 64 spaces on the board. At the end of the 64th space, row num '1' is printed.
+            print('  ' + str(rows[rowNum]), end='')
+        elif space % 8 == 0 and space < 64:     # At the end of each row of 8 spaces, print the row number, then subtract rowNum by 1 in order to get the next rowNum. Then print the lines between rows.
+            print('  ' + str(rows[rowNum]), end='')
+            rowNum -= 1
+            print('\n', end = '')               # Note that rowNum '1' isn't printed, because if it were, then the next row of '|' and '-' is also printed.
+            print('|' + (('-' * 6 +'|') * 8))
+            print('|', end = '')
+    print('\n' + chr(175) + (chr(175) * ((6*8)+8)))         #Print the line on the bottom of the board.
+
 def chessInit(board):
     '''This function initializes the starting positions of the chessboard.'''
     for k in board.keys():
@@ -1384,11 +1416,20 @@ def blackMove(board):
 testBoard = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
     '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': ' ', '7e': 'bp', '7f': 'wR', '7g': 'bp', '7h': 'bp',
     '6a': 'wp', '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ',
-    '5a': ' ', '5b': 'wK', '5c': ' ', '5d': ' ', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
+    '5a': ' ', '5b': 'wK', '5c': ' ', '5d': 'bp', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
     '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': ' ', '4g': ' ', '4h': ' ',
     '3a': 'bp', '3b': 'wp', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ',
     '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': 'wN', '2g': 'wp', '2h': ' ',
     '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': ' ', '1f': 'wN', '1g': 'wB', '1h': ' '}
+
+# testBoard2 = {'8a': 'bR', '8b': 'bB', '8c': 'bN', '8d': 'bQ', '8e': 'bK', '8f': 'bN', '8g': 'bB', '8h': 'bR',
+#     '7a': 'bp', '7b': 'bp', '7c': 'bp', '7d': ' ', '7e': 'bp', '7f': 'bp', '7g': 'bp', '7h': 'bp',
+#     '6a': ' ', '6b': ' ', '6c': ' ', '6d': ' ', '6e': ' ', '6f': ' ', '6g': ' ', '6h': ' ',
+#     '5a': ' ', '5b': ' ', '5c': ' ', '5d': 'bp', '5e': ' ', '5f': ' ', '5g': ' ', '5h': ' ',
+#     '4a': ' ', '4b': ' ', '4c': ' ', '4d': ' ', '4e': ' ', '4f': 'wp', '4g': ' ', '4h': ' ',
+#     '3a': ' ', '3b': ' ', '3c': ' ', '3d': ' ', '3e': ' ', '3f': ' ', '3g': ' ', '3h': ' ',
+#     '2a': 'wp', '2b': 'wp', '2c': 'wp', '2d': 'wp', '2e': 'wp', '2f': ' ', '2g': 'wp', '2h': 'wp',
+#     '1a': 'wR', '1b': 'wB', '1c': 'wN', '1d': 'wQ', '1e': 'wK', '1f': 'wN', '1g': 'wB', '1h': 'wR'}
 
 # Welcome Screen.
 print('\n\n' + Fore.GREEN + Back.BLACK + ('~' * 131) + Fore.RESET + Back.RESET)

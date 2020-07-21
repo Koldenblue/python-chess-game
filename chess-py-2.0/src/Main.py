@@ -39,6 +39,8 @@ def main():
             print(f"Invalid move! You must choose a {turn} piece to move!")
             continue
         end_posn = move_input(chessboard, "End")
+        if end_posn == 'undo':
+            continue
         end_column, end_row = chessboard.get_indices(end_posn)
 
         # Validate the movement of the piece.
@@ -55,6 +57,7 @@ def main():
             if not black_turn and wK.in_check:
                 print(f"Invalid move! Friendly {turn} king would be placed in check.")
                 continue
+        # Prints different text depending on if the king was in check at the start of the turn.
         else:
             if black_turn and bK.in_check:
                 print(f"Invalid move! Friendly {turn} king is still in check.")
@@ -85,18 +88,22 @@ def move_input(chessboard, start_end):
     '''Gets start or end locations from the player. Chessboard is a Board object.
     start_end is a string equal to "Start" or "End".'''
     while True:
+        if start_end == "End":
+            print('Type "undo" to return to beginning of turn.')
+
         posn = input(f"{start_end} location? Type \"board\" at any time to view the board.\n")
         posn = posn.lower().strip()
         if posn == "board":
-            chessboard.visual_board()
+            print(chessboard)
             continue
+        if posn.lower() == 'undo':
+            return posn
         elif posn in chessboard.space_list:
             pass
         else:
             print("Invalid location!")
             continue
-        
-        #TODO: return "undo" to restart movement
+
         return posn
 
 
@@ -208,6 +215,7 @@ pawn and rook movement
 '''
 POSSIBLE FEATURES:
 movement hints to get out of check
+temporarily move pieces as thought experiments, then undo that movement
 '''
 
 '''

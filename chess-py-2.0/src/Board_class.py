@@ -4,6 +4,7 @@ from Piece_class import Piece
 from NullPiece_class import NullPiece
 from King_class import King
 from Pawn_class import Pawn
+from Queen_class import Queen
 import copy
 
 class Board:
@@ -291,6 +292,8 @@ class Board:
         self.space_array[7][0] = Rook(False)    # h1
         self.space_array[4][7] = King(True)     # e8
         self.space_array[4][0] = King(False)    # e1
+        self.space_array[3][7] = Queen(True)    # d8
+        self.space_array[3][0] = Queen(False)   # d1
         # black pawns, a7 through h7:
         for i in range(self.BOARD_SIZE):
             self.space_array[i][6] = Pawn(True)
@@ -341,6 +344,8 @@ class Board:
         self.space_array[7][0] = Rook(False)
         self.space_array[4][7] = King(True)
         self.space_array[4][0] = King(False)
+        self.space_array[3][7] = Queen(True)    # d8
+        self.space_array[3][0] = Queen(False)   # d1
         # black pawns, a7 through h7:
         #for i in range(self.BOARD_SIZE):
         #    self.space_array[i][6] = Pawn(True)

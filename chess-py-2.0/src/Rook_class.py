@@ -12,6 +12,7 @@ class Rook (Piece):
 
     def validate_move(self, start_column, start_row, end_column, end_row, board_array):
         ''' Returns True if movement of a rook is valid.'''
+
         valid_end_check = False
         # If the rook does not move at all, return False:
         if start_column == end_column and start_row == end_row:

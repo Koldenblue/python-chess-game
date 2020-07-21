@@ -7,5 +7,5 @@ class NullPiece (Piece):
         self.black = None
 
     def validate_move(self, start_column, start_row, end_column, end_row, board_array):
-        '''Represents that NullPiece()s have no movement. Function is  available but currently unused.'''
+        '''Represents that NullPiece()s have no movement. Function is available but currently unused.'''
         return False

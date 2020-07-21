@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class Piece:
     def __init__(self, black=True):
         '''A chess piece. black is a bool corresponding to the color of the piece.'''
@@ -14,3 +16,11 @@ class Piece:
             if valid_move:
                 possible_moves.append(location)
         return possible_moves
+
+    def straight_line_movement(self, start_column, start_row, end_column, end_row, board_array):
+        valid_end_check = False
+        return valid_end_check
+
+    def diagonal_line_movement(self, start_column, start_row, end_column, end_row, board_array):
+        valid_end_check = False
+        return valid_end_check
