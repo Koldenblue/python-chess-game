@@ -17,48 +17,30 @@ class King (Piece):
         '''Evaluates whether or not a king is in check. Returns True if king is placed in check. Should be called after any movement.'''
         # Code for a black King. Color is checked at top of function so that it only has to be checked once.
         checks_king = False
-        if self.black:
-            # Iterate over the column and row indices.
-            for column, piece_list in enumerate(board_array):
-                for row in range(len(piece_list)):
-                    # Use the column and row indices to determine if a white piece is at that location.
-                    # If a white piece is present, determine if it can move to the given black king location.
-                    if board_array[column][row].black == False:
-                        checks_king = board_array[column][row].validate_move(column, row, king_column, king_row, board_array)
-                        if checks_king:
-                            return checks_king
-            return checks_king
-
-        # Code for a white King. Similar to black King code.
-        if self.black == False:
-            for column, piece_list in enumerate(board_array):
-                for row in range(len(piece_list)):
-                    if board_array[column][row].black == True:
-                        checks_king = board_array[column][row].validate_move(column, row, king_column, king_row, board_array)
-                        if checks_king:
-                            return checks_king
-            return checks_king
-
-
-    def eval_checkmate(self, board_array, black_turn):
-        '''If a king is in check, this function should be called, and will return true if checkmate.
-        baord_array is the current board state. black_turn is a boolean.'''
-        for column, column_list in enumerate(board_array):
-            for row in range(len(column_list)):
-                # If the piece belongs to the current player:
-                # psuedocode: First check to see if the king can move.
-                # Use the above eval_check function to see if the king is still in check.
-                # Next loop through same color pieces and get possible movements.
-                # Maybe create a new piece function to get an array of all possible movement locations?
-                # Finally, loop through the possible movement locations and see if any cause eval_check to return false.
-                # If not, checkmate.
-                if board_array[column][row].black == black_turn:
-                    can_move = board_array[column][row].validate_move()
-                    still_checked = eval_check()
-        return False
+        # Iterate over the column and row indices.
+        for column, piece_list in enumerate(board_array):
+            for row in range(len(piece_list)):
+                # Use the column and row indices to determine if an enemy piece is at that location.
+                # If enemy piece is present, determine if it can move to the given king location.
+                if board_array[column][row].black != self.black:
+                    checks_king = board_array[column][row].validate_move(column, row, king_column, king_row, board_array)
+                    if checks_king:
+                        return checks_king
+        return checks_king
 
 
     def validate_move(self, start_column, start_row, end_column, end_row, board_array):
-        #TODO
+        '''Validates movement for a king piece.'''
         valid_end_check = False
+        # Check to make sure the target space isn't already occupied by a friendly piece
+        if board_array[end_column][end_row].black == self.black:
+            return valid_end_check
+        # if the king only moves one space, the move is valid:
+        if abs(end_row - start_row) == 1:
+            if abs(end_column - start_column) in [0, 1]:
+                valid_end_check = True
+        if abs(end_column - start_column) == 1:
+            if abs(end_row - start_row) in [0, 1]:
+                valid_end_check = True
+        # Check to make sure the target space isn't already occupied by a friendly piece
         return valid_end_check
