@@ -14,6 +14,8 @@ class Board:
     BOARD_SIZE = 8
     MAX_ROW = BOARD_SIZE - 1
     MAX_COLUMN = BOARD_SIZE - 1
+    COLOR_BLACK = 'red'
+    COLOR_WHITE = 'cyan'
 
     def __init__(self):
         '''Creates a board object consisting of 64 named spaces, a1 thru h8, 
@@ -184,7 +186,8 @@ class Board:
 
     def move_mirror(self, start_column, start_row, end_column, end_row):
         '''Moves a piece on a copy of the board array.'''
-        # Add [:] to make a copy, rather than simply referencing the same array!
+        # copy.deepcopy(), rather than simply board_copy = self.space_array[:],
+        # must be used to copy in order to avoid referencing the same array!
         board_copy = copy.deepcopy(self.space_array)
         starting_piece = board_copy[start_column][start_row]
         board_copy[start_column][start_row] = NullPiece()
@@ -193,7 +196,7 @@ class Board:
 
     def visual_board(self):
         '''Prints out a graphic representation of a chessboard.'''
-        '''Should be replaced by the __str__ method below.'''
+        '''Should not be used to print board. Instead use the __str__ method below.'''
         #Print out column letters:
         print("\n")
         print("   ", end="")

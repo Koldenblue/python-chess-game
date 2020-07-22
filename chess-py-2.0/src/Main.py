@@ -221,4 +221,6 @@ temporarily move pieces as thought experiments, then undo that movement
 '''
 TODO:
 convert chessboard.visual_board() to print(chessboard)
+add colors to visual board
+can possibly get rid of the valid_end_check variable in a lot of places
 '''
