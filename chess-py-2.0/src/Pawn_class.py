@@ -1,7 +1,9 @@
 from Piece_class import Piece
 
 class Pawn (Piece):
+
     def __init__(self, black):
+        '''Constructs a pawn piece with a color and associated movement functions.'''
         Piece.__init__(self, black)
         if self.black:
             self.symbol = 'bp'

@@ -17,7 +17,7 @@ class Bishop(Piece):
         if start_column == end_column and start_row == end_row:
             return valid_end_check
 
-        if Piece.diagonal_line_movement:
+        if Piece.diagonal_line_movement(self, start_column, start_row, end_column, end_row, board_array):
             return True
 
         return valid_end_check
