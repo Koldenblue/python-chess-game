@@ -136,7 +136,6 @@ def test():
             enemy = "white"
         print(chessboard)
         game_over = False
-        print(f"GAME OVER! CHECKMATE! {enemy.upper()} WINS!")
         if king_checked:
             print("{0} king is in check.".format(turn.title()))
             game_over = chessboard.checkmates_king(black_turn)
@@ -194,8 +193,8 @@ def test():
             black_turn = False
 
 
-test()
-#main()
+#test()
+main()
 
 
 
@@ -206,16 +205,12 @@ Making chessboard = Board() and then running boardinit(), then running main() se
 May be a problem for game restart.
 '''
 
-'''
-WORKING:
-pawn capture pieces
-pawn and rook movement
-'''
 
 '''
 POSSIBLE FEATURES:
 movement hints to get out of check
 temporarily move pieces as thought experiments, then undo that movement
+colored pieces
 '''
 
 '''
