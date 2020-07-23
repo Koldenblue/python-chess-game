@@ -18,4 +18,4 @@ class Rook (Piece):
         if start_column == end_column and start_row == end_row:
             return valid_end_check
 
-        return Piece.straight_line_movement(start_column, start_row, end_column, end_row, board_array)
+        return Piece.straight_line_movement(self, start_column, start_row, end_column, end_row, board_array)
