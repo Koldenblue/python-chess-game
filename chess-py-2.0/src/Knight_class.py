@@ -18,8 +18,7 @@ class Knight (Piece):
         if abs(start_column - end_column) == 1 and abs(start_row - end_row) == 2:
             if board_array[start_column][start_row].black != board_array[end_column][end_row].black:
                 return True
-        elif abs(start_column - end_column) == 2 and abs(start_row - end_row) == 1:
+        if abs(start_column - end_column) == 2 and abs(start_row - end_row) == 1:
             if board_array[start_column][start_row].black != board_array[end_column][end_row].black:
                 return True
-        else:
-            return False
+        return False

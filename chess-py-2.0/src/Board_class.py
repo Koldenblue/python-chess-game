@@ -5,6 +5,8 @@ from NullPiece_class import NullPiece
 from King_class import King
 from Pawn_class import Pawn
 from Queen_class import Queen
+from Bishop_class import Bishop
+from Knight_class import Knight
 import copy
 
 class Board:
@@ -14,8 +16,6 @@ class Board:
     BOARD_SIZE = 8
     MAX_ROW = BOARD_SIZE - 1
     MAX_COLUMN = BOARD_SIZE - 1
-    COLOR_BLACK = 'red'
-    COLOR_WHITE = 'cyan'
 
     def __init__(self):
         '''Creates a board object consisting of 64 named spaces, a1 thru h8, 
@@ -174,8 +174,7 @@ class Board:
 
 
     def move(self, start_column, start_row, end_column, end_row):
-        '''Moves a piece on the board. Prints when pieces have been captured.
-        Prints out the new board state.'''
+        '''Moves a piece on the board. Prints when pieces have been captured.'''
         starting_piece = self.space_array[start_column][start_row]
         self.space_array[start_column][start_row] = NullPiece()
         if self.space_array[end_column][end_row].black != None:
@@ -297,14 +296,21 @@ class Board:
         self.space_array[4][0] = King(False)    # e1
         self.space_array[3][7] = Queen(True)    # d8
         self.space_array[3][0] = Queen(False)   # d1
+        self.space_array[1][7] = Knight(True)   # b8
+        self.space_array[6][7] = Knight(True)   # g8
+        self.space_array[1][0] = Knight(False)   # b1
+        self.space_array[6][0] = Knight(False)   # g1
+        self.space_array[2][7] = Bishop(True)   # c8
+        self.space_array[5][7] = Bishop(True)   # f8
+        self.space_array[2][0] = Bishop(False)   # c1
+        self.space_array[5][0] = Bishop(False)   # f1
+
         # black pawns, a7 through h7:
         for i in range(self.BOARD_SIZE):
             self.space_array[i][6] = Pawn(True)
         # white pawns, a2 through h2:
         for j in range(self.BOARD_SIZE):
             self.space_array[j][1] = Pawn(False)
-
-        #TODO: Initialize other pieces.
 
         # Finally, set empty spaces to contain NullPiece()s
         for i in range(len(self.space_array)):

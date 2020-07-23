@@ -1,12 +1,12 @@
 from datetime import datetime
 
 class Piece:
+    COLOR_BLACK = 'red'
+    COLOR_WHITE = 'cyan'
+
     def __init__(self, black=True):
         '''A chess piece. black is a bool corresponding to the color of the piece.'''
         self.black = black
-
-    # Possible functions: piece count tracking
-    # captured piece tracking
 
     def get_end_locations(self, piece_obj, start_column, start_row, end_location_array, board_array):
         '''A function that returns an array of all valid movement locations for a given piece.'''
@@ -78,3 +78,6 @@ class Piece:
 
         # if all the above conditions are passed, return true.
         return True
+
+    # Possible functions: piece count tracking
+    # captured piece tracking
