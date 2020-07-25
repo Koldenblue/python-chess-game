@@ -3,11 +3,14 @@ A chess game programmed in python, by me, Kevin.
 
 Special thanks to Russell, Tristan, and Elliot (the first two of whom are my brothers)! They have been immensely helpful in all sorts of aspects of coding.
 
+
 ![image](https://user-images.githubusercontent.com/64618290/88246685-116c9480-cc50-11ea-97c6-68a0bd02c1de.png)
+
 These chess programs demonstrate the importance of object-oriented programming and design. Chess 1.0 uses procedural programming in a single file.  See the associated readme in the chess-py-1.0 file for more details.
 
 ![image](https://user-images.githubusercontent.com/64618290/88463694-6df6cc00-ce69-11ea-8540-c19525a978a2.png)
 Chess 2.0 uses objects and classes in multiple files. See the associated readme in the chess-py-2.0 file for details.
+
 
 
 
