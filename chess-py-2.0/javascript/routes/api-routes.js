@@ -8,8 +8,9 @@ module.exports = function(app) {
 
 app.get("/api/python/start", (req, res) => {
     console.log("starting");
-    startGame().then(() => {
+    startGame().then((py) => {
         console.log("started")
+        console.log(py)
     })
 })
 
@@ -27,11 +28,11 @@ function startGame() {
         let args = ["../../src/main"]     // array of argument vectors. The first argument vector is the python filepath.
 
         // try to run different terminal commands one at a time ["py", "python3", "python"]. These may vary depending on computer.
-        spawnPython(pythonFilenames[pythonFile], args).then(() => resolve())
+        spawnPython(pythonFilenames[pythonFile], args).then((py) => resolve(py))
         .catch((err) => {
-            spawnPython(pythonFilenames[++pythonFile], args).then(() => resolve())
+            spawnPython(pythonFilenames[++pythonFile], args).then((py) => resolve(py))
         }).catch((err) => {
-            spawnPython(pythonFilenames[++pythonFile], args).then(() => resolve())
+            spawnPython(pythonFilenames[++pythonFile], args).then((py) => resolve(py))
         }).catch((err) => {
             reject("Error: Could not find python filepath.");
         })
@@ -59,6 +60,6 @@ function spawnPython(pythonFile, args) {
         let py = spawn(pythonFile, args).on('error', (err) => {
             reject("Improper python path.");
         })
-        resolve();
+        resolve(py);
     })
 }
