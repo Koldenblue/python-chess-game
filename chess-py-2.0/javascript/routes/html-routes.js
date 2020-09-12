@@ -1,7 +1,9 @@
+const path = require("path");
+
 module.exports = function(app) {
-    
+
 app.get("*", (req, res) => {
-    res.status(200).end();
+    res.sendFile(path.join(__dirname, "../public/index.html"));
 })
 
 }
