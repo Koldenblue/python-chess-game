@@ -11,9 +11,17 @@ function main() {
 function addListeners() {
 
     $("#start-btn").on("click", () => {
-        $("#start-btn").slideToggle("fast");
-        $.get("/api/python/start").then((result) => {
-            console.log(result)
+        // $("#start-btn").slideToggle("fast");
+        $.get("/api/python/start").then((py) => {
+            console.log(py)
+            // py.stdout.on("data", (data) => {
+            //     data = data.toString();
+            //     console.log(data)
+            //     console.log("z")
+            //     res.json(data)
+            // })
+            console.log(py.stdout._events.data)
+
         })
     });
 

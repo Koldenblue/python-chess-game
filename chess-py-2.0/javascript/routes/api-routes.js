@@ -8,33 +8,41 @@ module.exports = function(app) {
 
 app.get("/api/python/start", (req, res) => {
     console.log("starting");
-    // startGame().then((py) => {
-    let args = ["../nodePythonApp/Main.py", "an argument"]
-    let py = spawn("python3", args).on('error', (err) => {
-        reject("Improper python path.");
+    startGame().then((py) => {
+        // console.log(py)
+        // console.log(py.stdout._events.data)
+        py.stdout.on("data", (data) => {
+            data = data.toString();
+            console.log(data)
+            console.log("z")
+            res.json(data)
+        })
+        console.log(py.stdout._events.data)
+        return py
+    }).then((py) => {
+        // res.json(py.stdout._events.data)
+        res.json(py)
     })
-    console.log("started")
-    // console.log(py)
-    
-    py.stdout.on("data", (data) => {
-        data = data.toString();
-        console.log(data)
-        console.log("z")
-        
-    })
-    // console.log(py)
-    console.log(py.stdout._events.data)
 })
 
-app.get("/api/python/:moveInput", (req, res) => {
-    console.log("hi");
-    console.log(req.params);
-    res.status(200).end()
-});
+
+function start() {
+    startGame().then((py) => {
+        // console.log(py)
+        console.log(py.stdout._events.data)
+        py.stdout.on("data", (data) => {
+            data = data.toString();
+            console.log(data)
+            console.log("z")
+        })
+        console.log(py.stdout._events.data)
+        console.log("hello")
+    });
 }
 
-/** Input the moves for the chess game.
- * @param {string} move - A string from a1 thru h8 representing board positions. */
+start();
+
+
 function startGame() {
     return new Promise((resolve, reject) => {
         let args = ["../nodePythonApp/Main.py"]     // array of argument vectors. The first argument vector is the python filepath.
@@ -60,7 +68,7 @@ function startGame() {
     })
 }
 
-let foundPython = false;  // bool that gets set to true once proper python installation is found. Global so that it is persistent.
+
 
 let dataString = "x";
 /** Spawn new python program designed to accept an array of arguments and format into a table.
@@ -76,4 +84,19 @@ function spawnPython(pythonFile, args) {
 
         resolve(py);
     })
+}
+
+
+
+app.get("/api/python/:moveInput", (req, res) => {
+    console.log("hi");
+    console.log(req.params);
+    res.status(200).end()
+});
+}
+
+/** Input the moves for the chess game.
+ * @param {string} move - A string from a1 thru h8 representing board positions. */
+function inputMove() {
+    
 }
