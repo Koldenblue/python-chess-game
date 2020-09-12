@@ -1,11 +1,17 @@
 #!/usr/bin/python3
+import sys
+import time
+time.sleep(2)
+print("hello")
+print(sys.argv[0])
+
+sys.stdout.flush()
 
 from Rook_class import Rook
 from Piece_class import Piece
 from Position_class import Position
 from Board_class import Board
 from King_class import King
-import sys
 
 
 def main():
@@ -24,6 +30,7 @@ def main():
             turn = "black"
             enemy = "white"
         print(chessboard)
+        sys.stdout.flush()
 
         if king_checked:
             print("{0} king is in check.".format(turn.title()))
@@ -194,7 +201,6 @@ def test():
             black_turn = False
 
 
-test()
 main()
 
 
