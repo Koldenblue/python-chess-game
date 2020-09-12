@@ -77,7 +77,8 @@ class Piece:
             return valid_end_check
 
         # if all the above conditions are passed, return true.
-        return True
+        valid_end_check = True
+        return valid_end_check
 
     # Possible functions: piece count tracking
     # captured piece tracking
