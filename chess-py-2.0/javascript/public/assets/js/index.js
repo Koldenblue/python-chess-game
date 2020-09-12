@@ -1,3 +1,26 @@
+const submitBtn = $("#submit-move");
+const movementForm = $("#movement-form")
+
+$(document).ready(main)
+
+function main() {
+    addListeners();
+    $("#move-input").focus();
+}
+
+function addListeners() {
+    movementForm.on("submit", function(event) {
+        event.preventDefault();
+        console.log("submitted");
+        $("h2").slideToggle("slow");
+    });
+}
+
+
+
+
+
+
 const pythonFilenames = ["py", "python3", "python"]
 // pythonFile is the array index to use from the above array (pythonFilenames). This variable is global so that it is stored persistently.
 let pythonFile = 0;
