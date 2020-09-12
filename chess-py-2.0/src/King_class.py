@@ -39,8 +39,8 @@ class King (Piece):
         if abs(end_row - start_row) == 1:
             if abs(end_column - start_column) in [0, 1]:
                 valid_end_check = True
-        if abs(end_column - start_column) == 1:
-            if abs(end_row - start_row) in [0, 1]:
+        elif abs(end_column - start_column) == 1:
+            if abs(end_row - start_row) in [0, 1]:  # technically don't need this line
                 valid_end_check = True
         # Check to make sure the target space isn't already occupied by a friendly piece
         return valid_end_check
