@@ -9,6 +9,15 @@ function main() {
 }
 
 function addListeners() {
+
+    $("#start-btn").on("click", () => {
+        $("#start-btn").slideToggle("fast");
+        $.get("/api/python/start").then((result) => {
+            console.log(result)
+        })
+    });
+
+
     // add listener to submit movement form
     movementForm.on("submit", function(event) {
         event.preventDefault();
@@ -22,7 +31,7 @@ function addListeners() {
         console.log($("#move-input"))
 
         // TODO: could just validate input here 
-        
+
         // send form value
         console.log($("#move-input").val())
         let moveInput = $("#move-input").val();

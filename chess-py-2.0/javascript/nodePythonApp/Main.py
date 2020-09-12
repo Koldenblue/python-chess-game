@@ -7,6 +7,7 @@ from Board_class import Board
 from King_class import King
 import sys
 
+
 def main():
     chessboard = Board()
     chessboard.board_init()

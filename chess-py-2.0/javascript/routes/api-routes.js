@@ -1,9 +1,17 @@
 const pythonFilenames = ["py", "python3", "python"]
 // pythonFile is the array index to use from the above array (pythonFilenames). This variable is global so that it is stored persistently.
 let pythonFile = 0;
+const { spawn } = require("child_process");     // for connecting to python file
 
 
 module.exports = function(app) {
+
+app.get("/api/python/start", (req, res) => {
+    console.log("starting");
+    startGame().then(() => {
+        console.log("started")
+    })
+})
 
 app.get("/api/python/:moveInput", (req, res) => {
     console.log("hi");
@@ -14,29 +22,18 @@ app.get("/api/python/:moveInput", (req, res) => {
 
 /** Input the moves for the chess game.
  * @param {string} move - A string from a1 thru h8 representing board positions. */
-function inputMoves(move) {
+function startGame() {
     return new Promise((resolve, reject) => {
         let args = ["../../src/main"]     // array of argument vectors. The first argument vector is the python filepath.
 
-        // add move input to arg vectors
-        args.push(move);
-
-        spawnPython(pythonFilenames[pythonFile], args).then(data => {
-            resolve(data);
-        })
         // try to run different terminal commands one at a time ["py", "python3", "python"]. These may vary depending on computer.
+        spawnPython(pythonFilenames[pythonFile], args).then(() => resolve())
         .catch((err) => {
-            pythonFile++;
-            spawnPython(pythonFilenames[pythonFile], args).then(data => {
-                resolve(data);
-            }).catch((err) => {
-                pythonFile++;
-                spawnPython(pythonFilenames[pythonFile], args).then(data => {
-                    resolve(data);
-                }).catch((err) => {
-                    reject("Error: Could not find python filepath.");
-                })
-            })
+            spawnPython(pythonFilenames[++pythonFile], args).then(() => resolve())
+        }).catch((err) => {
+            spawnPython(pythonFilenames[++pythonFile], args).then(() => resolve())
+        }).catch((err) => {
+            reject("Error: Could not find python filepath.");
         })
     }).catch((err) => {
         // if cannot find python, try again without python
@@ -62,18 +59,6 @@ function spawnPython(pythonFile, args) {
         let py = spawn(pythonFile, args).on('error', (err) => {
             reject("Improper python path.");
         })
-        // on data event emitted by python program, resolve promise.
-        py.stdout.on('data', (data) => {
-            data = data.toString();
-            foundPython = true;
-            resolve(data);
-        })
-        // If system hangs due to permission error, etc, wait to see if python file has been found before returning promise rejection
-        setTimeout(() => {
-            if (!foundPython) {
-                console.log("Searching for python filepath...")
-                reject("Improper python path.");
-            }
-        }, 1500);
+        resolve();
     })
 }
