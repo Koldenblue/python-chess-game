@@ -1,0 +1,15 @@
+{
+  "name": "python-chess",
+  "version": "1.0.0",
+  "description": "chess written in python and running through node",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "nodemon server.js"
+  },
+  "author": "Kevin Miller",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
