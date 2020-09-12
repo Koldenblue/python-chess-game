@@ -9,11 +9,8 @@ app.get("/api/python/:moveInput", (req, res) => {
     console.log("hi");
     console.log(req.params);
     res.status(200).end()
-})
+});
 }
-
-
-
 
 /** Input the moves for the chess game.
  * @param {string} move - A string from a1 thru h8 representing board positions. */
