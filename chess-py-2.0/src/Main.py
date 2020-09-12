@@ -193,7 +193,7 @@ def test():
             black_turn = False
 
 
-#test()
+test()
 main()
 
 
