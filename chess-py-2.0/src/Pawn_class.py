@@ -69,7 +69,7 @@ class Pawn (Piece):
                             valid_end_check = True
                             return valid_end_check
                     if end_row == 3:
-                        if board_array[end_column][end_row].black == None and board_array[end_column][end_row + 1].black == None:
+                        if board_array[end_column][end_row].black == None and board_array[end_column][end_row - 1].black == None:
                             valid_end_check = True
                             return valid_end_check
                     return valid_end_check
